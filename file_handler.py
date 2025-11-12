@@ -135,7 +135,8 @@ def main():
     # Auto-train ML model on startup
     print("Initializing ML Model...")
     print("-" * 50)
-    dataset_path = r"c:\Users\reham adel\Downloads\dataset1.csv"
+    dataset_path = os.path.join(os.path.dirname(__file__), "dataset1.csv")
+
     
     if os.path.exists(dataset_path): 
         print(f"Found dataset: {dataset_path}")
