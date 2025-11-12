@@ -358,7 +358,7 @@ def main():
     predictor = ComplexityPredictor()
     
     # Train the model with force retrain to see advanced preprocessing
-    dataset_path = r"c:\Users\reham adel\Downloads\dataset1.csv"
+    dataset_path = os.path.join(os.path.dirname(__file__), "dataset1.csv")
     success = predictor.train_model(dataset_path, force_retrain=True)
     
     if success:

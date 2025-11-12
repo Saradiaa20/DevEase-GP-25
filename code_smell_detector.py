@@ -1022,23 +1022,30 @@ class CodeSmellDetector:
                     ))
     
     def _detect_hardcoded_values(self, content: str):
-        """Detect hardcoded values that should be constants"""
+        """Detect hardcoded values that should be constants (URLs, file paths, IPs, dates, etc.)"""
         # Look for hardcoded URLs, file paths, etc.
+        import re
         hardcoded_patterns = [
-            (r'https?://[^\s\'"]+', "hardcoded_url"),
-            (r'[A-Za-z]:\\[^\s\'"]+', "hardcoded_path"),
-            (r'/[^\s\'"]+', "hardcoded_path"),
+            (r'https?://[^\s\'"<>]+', "hardcoded_url"),
+            (r'[A-Za-z]:\\\\(?:[^\s\'"]+\\\\)*[^\s\'"]+', "hardcoded_path"),
+            (r'(?<!:)\/(?:[^\s\'"]+\/)*[^\s\'"]+', "hardcoded_path"),
             (r'\b\d{4}-\d{2}-\d{2}\b', "hardcoded_date"),
-            (r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b', "hardcoded_ip")
+            (r'\b(?:\d{1,3}\.){3}\d{1,3}\b', "hardcoded_ip"),
         ]
         
         for pattern, smell_type in hardcoded_patterns:
             for match in re.finditer(pattern, content):
                 line_num = content[:match.start()].count('\n') + 1
                 value = match.group(0)
+
+                # Filter out harmless paths like import statements or comments
+                if re.match(r'^\s*(import|package)\b', value):
+                    continue
+
                 self.smells.append(CodeSmell(
-                    smell_type, "low",
-                    f"Hardcoded value: {value}",
+                    smell_type, 
+                    "low",
+                    f"Hardcoded value detected: {value}",
                     line_num,
                     "Consider extracting this value into a named constant or configuration"
                 ))
