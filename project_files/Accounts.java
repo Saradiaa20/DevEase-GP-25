@@ -12,26 +12,26 @@ public class Accounts {
         this.amount = amt;
     }
     
-//     public void deposit(float amt){
-//         this.amount = this.amount + amt;
-//     }
+    public void deposit(float amt){
+        this.amount = this.amount + amt;
+    }
     
-//     public void withDraw(float amt){
-//         if(this.amount < amt){
-//             System.out.println("Can't proceed");
-//         }
-//         else{
-//             this.amount = this.amount - amt;
-//         }
-//     }
+    public void withDraw(float amt){
+        if(this.amount < amt){
+            System.out.println("Can't proceed");
+        }
+        else{
+            this.amount = this.amount - amt;
+        }
+    }
     
-//     public void checkBalance(){
-//         System.out.println("Your balance is: " + this.amount);
-//     }
+    public void checkBalance(){
+        System.out.println("Your balance is: " + this.amount);
+    }
 
-//     @Override
-//     public String toString() {
-//         return "Accounts{" + "accountNumber=" + accountNumber + ", name=" + name + ", amount=" + amount + '}';
-//     }
+    @Override
+    public String toString() {
+        return "Accounts{" + "accountNumber=" + accountNumber + ", name=" + name + ", amount=" + amount + '}';
+    }
     
 }
