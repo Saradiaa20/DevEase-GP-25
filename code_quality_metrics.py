@@ -70,11 +70,11 @@ class CodeQualityAnalyzer:
         base_score = 100.0
         
         # Penalize based on smell severity
-        by_severity = smell_summary.get("by_severity", {})
-        base_score -= by_severity.get("critical", 0) * 15  # -15 points per critical smell
-        base_score -= by_severity.get("high", 0) * 10      # -10 points per high severity smell
-        base_score -= by_severity.get("medium", 0) * 5     # -5 points per medium severity smell
-        base_score -= by_severity.get("low", 0) * 2        # -2 points per low severity smell
+        # by_severity = smell_summary.get("by_severity", {})
+        # base_score -= by_severity.get("critical", 0) * 15  # -15 points per critical smell
+        # base_score -= by_severity.get("high", 0) * 10      # -10 points per high severity smell
+        # base_score -= by_severity.get("medium", 0) * 5     # -5 points per medium severity smell
+        # base_score -= by_severity.get("low", 0) * 2        # -2 points per low severity smell
         
         # Penalize for specific maintainability issues
         by_type = smell_summary.get("by_type", {})
@@ -329,8 +329,8 @@ class CodeQualityAnalyzer:
     
     def print_quality_report(self, quality_score: QualityScore):
         """Print a formatted quality report"""
-        print(f"\nCode Quality Analysis Report")
-        print("=" * 60)
+        # print("\nCode Quality Analysis Report")
+        # print("-" * 60)
         
         # Overall score
         if quality_score.overall_score >= 90:
