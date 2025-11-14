@@ -244,7 +244,7 @@ class ComplexityPredictor:
                 best_model_name = name
                 self.model = model
         print("-"*50)
-        print("\nML traniny models")
+        print("\nML tranined models")
         print("\nModel Comparison Results:")
         for name, accuracy in results.items():
             print(f"  {name}: {accuracy:.4f}")
@@ -363,17 +363,17 @@ class ComplexityPredictor:
         
         try:
             # # Prepare feature vector in the same order as training
-            # feature_vector = np.array([[
-            #     features.get('no_of_ifs', 0),
-            #     features.get('no_of_loop', 0),
-            #     features.get('no_of_break', 0),
-            #     features.get('priority_queue_present', 0),
-            #     features.get('no_of_sort', 0),
-            #     features.get('hash_set_present', 0),
-            #     features.get('hash_map_present', 0),
-            #     features.get('recursion_present', 0),
-            #     features.get('nested_loop_depth', 0)
-            # ]])
+            feature_vector = np.array([[
+                features.get('no_of_ifs', 0),
+                features.get('no_of_loop', 0),
+                features.get('no_of_break', 0),
+                features.get('priority_queue_present', 0),
+                features.get('no_of_sort', 0),
+                features.get('hash_set_present', 0),
+                features.get('hash_map_present', 0),
+                features.get('recursion_present', 0),
+                features.get('nested_loop_depth', 0)
+            ]])
 
             # Build a DataFrame with EXACT SAME columns as training
             X = pd.DataFrame([{
