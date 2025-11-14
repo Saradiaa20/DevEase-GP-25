@@ -21,10 +21,5 @@ public class Test2 {
             System.out.println("ok");
         else
             System.out.println("not ok"); // duplicated logic with no reason
-
-        // dead code
-        if(false){
-            System.out.println("Never executed");
-        }
     }
 }
