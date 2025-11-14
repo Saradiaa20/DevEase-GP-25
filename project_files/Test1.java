@@ -1,4 +1,4 @@
-// // Edited by QualiCode System
+
 
 public class Test1 {
     private int accountNumber;
