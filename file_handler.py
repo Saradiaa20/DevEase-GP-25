@@ -44,8 +44,8 @@ def analyze_file(file_path, handler, parser):
     """Complete analysis workflow: File Handler → Parsing → Code Smell Detection"""
     try:
         # Step 1: File Handler - Validate and read file
-        print(f"\nFile Handler: Processing {file_path}")
-        print("-" * 50)
+        # print(f"\nFile Handler: Processing {file_path}")
+        # print("-" * 50)
         
         if not os.path.exists(file_path):
             print(f"ERROR: File not found: {file_path}")
@@ -59,17 +59,17 @@ def analyze_file(file_path, handler, parser):
         
         # Read file content
         content = handler.read_file(file_path)
-        print(f"SUCCESS: File loaded successfully ({len(content)} characters)")
+        # print(f"SUCCESS: File loaded successfully ({len(content)} characters)")
         
         # Step 2: Parsing - AST Analysis
-        print(f"\nParsing: AST Analysis")
-        print("-" * 50)
+        # print("\nParsing: AST Analysis")
+        # print("-" * 50)
         
         result = parser.parse_file(file_path)
         
         # Display AST results
-        print("\nAST Analysis Results:")
-        print("=" * 50)
+        print("\nParsing: AST Analysis")
+        print("-" * 50)
         for k, v in result.items():
             if k not in ["code_smells", "quality_score"]:
                 if isinstance(v, list) and len(v) > 10:
@@ -78,41 +78,41 @@ def analyze_file(file_path, handler, parser):
                     print(f"{k}: {v}")
         
         # Step 3: Code Smell Detection
-        print(f"\nCode Smell Detection: Analyzing code quality")
+        print("\nCode Smell Detection: Analyzing code quality")
         print("-" * 50)
         
         if "code_smells" in result:
             parser.smell_detector.print_smell_report()
         
         # Step 4: Quality Metrics
-        print(f"\nCode Quality Metrics: Overall assessment")
-        print("-" * 50)
+        # print("\nCode Quality Metrics: Overall assessment")
+        # print("-" * 50)
         
         if "quality_score" in result:
             parser.quality_analyzer.print_quality_report(result["quality_score"])
         
         # Step 5: ML Complexity Prediction
-        print(f"\nML Complexity Prediction: AI-powered analysis")
+        # print("\nML Complexity Prediction: AI-powered analysis")
         print("-" * 50)
         
         if "ml_complexity" in result:
             ml_data = result["ml_complexity"]
             if "error" not in ml_data:
-                print(f"Extracted Features:")
+                print("Extracted Features:")
                 for feature, value in ml_data["features"].items():
                     print(f"  {feature}: {value}")
                 
-                print(f"\nML Prediction Results:")
-                if "prediction" in ml_data and "error" not in ml_data["prediction"]:
-                    parser.complexity_predictor.print_prediction_report(ml_data["prediction"])
-                else:
-                    print("  No trained model available. Train the model first!")
+                # print("\nML Prediction Results:")
+                # if "prediction" in ml_data and "error" not in ml_data["prediction"]:
+                #     parser.complexity_predictor.print_prediction_report(ml_data["prediction"])
+                # else:
+                #     print("  No trained model available. Train the model first!")
             else:
                 print(f"ML Prediction Error: {ml_data['error']}")
         
-        print("\n" + "=" * 60)
+        print("\n" + "-" * 50)
         print("SUCCESS: Complete Analysis Finished Successfully!")
-        print("=" * 60)
+
         
         return True
         
@@ -122,10 +122,9 @@ def analyze_file(file_path, handler, parser):
 
 def main():
     """Main DevEase application with integrated workflow"""
-    print("=" * 60)
-    print("    DevEase - Integrated Code Analysis Tool")
-    print("=" * 60)
-    print("Workflow: File Upload -> File Handler -> Parsing -> Code Smell Detection")
+    print("-" * 60)
+    print("    DevEase - Enhancment developer User experience Tool")
+    print("-" * 60)
     print()
     
     # Initialize components
@@ -133,17 +132,19 @@ def main():
     parser = ASTParser()
     
     # Auto-train ML model on startup
-    print("Initializing ML Model...")
-    print("-" * 50)
     dataset_path = os.path.join(os.path.dirname(__file__), "dataset1.csv")
 
     
     if os.path.exists(dataset_path): 
-        print(f"Found dataset: {dataset_path}")
-        print("Training ML model for complexity prediction...")
+        # print(f"Found dataset: {dataset_path}")
+        # print("Training ML model for complexity prediction...")
+        # success = parser.complexity_predictor.train_model(dataset_path, force_retrain=True)
+
+        parser.complexity_predictor.verify_preprocessing(dataset_path)
         success = parser.complexity_predictor.train_model(dataset_path, force_retrain=True)
+
         if success:
-            print("SUCCESS: ML model trained and ready!")
+            print("model trained Successfully.")
         else:
             print("WARNING: ML model training failed, but system will continue...")
     else:
@@ -159,15 +160,17 @@ def main():
         analyze_file(file_path, handler, parser)
         return
     
+
     # Interactive mode
     while True:
-        print("\nDevEase Menu:")
-        print("1. Upload and analyze a new file")
-        print("2. Choose from saved files")
+        print("-" * 50)
+        print("\n Welcome to DevEase ")
+        print("1. Upload a new file")
+        print("2. Choose a saved file")
         print("3. Exit")
         
         try:
-            choice = input("\nEnter choice (1-3): ").strip()
+            choice = input("\nEnter choice: ").strip()
             
             if choice == "1":
                 file_path = input("Enter the full path of the code file: ").strip()

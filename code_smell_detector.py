@@ -1089,19 +1089,19 @@ class CodeSmellDetector:
             print("No code smells detected!")
             return
         
-        print(f"\nCode Smell Analysis Report")
-        print(f"Total smells detected: {len(self.smells)}")
+        # print("\nCode Smell Analysis Report")
+        # print(f"Total smells detected: {len(self.smells)}")
         
         # Group by severity
-        by_severity = {"critical": [], "high": [], "medium": [], "low": []}
-        for smell in self.smells:
-            by_severity[smell.severity].append(smell)
+        # by_severity = {"critical": [], "high": [], "medium": [], "low": []}
+        # for smell in self.smells:
+        #     by_severity[smell.severity].append(smell)
         
-        # Print by severity
-        for severity, smells in by_severity.items():
-            if smells:
-                print(f"\n{severity.upper()} SEVERITY ({len(smells)} issues):")
-                for smell in smells:
-                    print(f"  Line {smell.line_number}: {smell.description}")
-                    print(f"    Suggestion: {smell.suggestion}")
-                    print()
+        # # Print by severity
+        # for severity, smells in by_severity.items():
+        #     if smells:
+        #         print(f"\n{severity.upper()} SEVERITY ({len(smells)} issues):")
+        #         for smell in smells:
+        #             print(f"  Line {smell.line_number}: {smell.description}")
+        #             print(f"    Suggestion: {smell.suggestion}")
+        #             print()
