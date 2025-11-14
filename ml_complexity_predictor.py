@@ -2,6 +2,10 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import GradientBoostingClassifier, VotingClassifier
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.impute import SimpleImputer
@@ -32,17 +36,59 @@ class ComplexityPredictor:
             'n_square': 'O(n²)',
             'nlogn': 'O(n log n)'
         }
+
+    def verify_preprocessing(self, csv_path: str) -> bool:
+        """
+        Run preprocessing silently and only return a success/failure message.
+        This does NOT print any detailed preprocessing logs.
+        """
+        try:
+            # 1. Load CSV
+            df = pd.read_csv(csv_path)
+
+            # 2. Check required columns exist
+            for col in self.feature_columns + ['complexity']:
+                if col not in df.columns:
+                    print(f"❌ ERROR: Missing required column: {col}")
+                    return False
+
+            # 3. Handle missing values quietly
+            df = df.dropna()
+
+            # 4. Remove duplicates quietly
+            df = df.drop_duplicates()
+
+            # 5. Extract feature matrix
+            X = df[self.feature_columns]
+
+            # 6. Impute quietly
+            self.imputer.fit_transform(X)
+
+            # 7. Scale quietly
+            self.scaler.fit_transform(X)
+
+            # 8. Encode labels quietly
+            y = df['complexity'].values
+            self.label_encoder.fit_transform(y)
+
+            print("Preprocessing completed successfully.")
+            return True
+
+        except Exception as e:
+            print(f"Preprocessing failed: {e}")
+            return False
+
     
     def load_dataset(self, csv_path: str) -> pd.DataFrame:
         """Load and preprocess the dataset with advanced preprocessing"""
         try:
             df = pd.read_csv(csv_path)
-            print(f"Dataset loaded: {len(df)} samples")
-            print(f"Features: {list(df.columns)}")
+            # print(f"Dataset loaded: {len(df)} samples")
+            # print(f"Features: {list(df.columns)}")
             
             # Advanced Data Preprocessing
-            print("\nAdvanced Data Preprocessing:")
-            print("-" * 50)
+            # print("\nAdvanced Data Preprocessing:")
+            # print("-" * 50)
             
             # Check for missing values
             missing_values = df.isnull().sum()
@@ -50,8 +96,8 @@ class ComplexityPredictor:
                 print(f"WARNING: Missing values found: {missing_values[missing_values > 0]}")
                 df = df.dropna()  # Remove rows with missing values
                 print(f"SUCCESS: After removing missing values: {len(df)} samples")
-            else:
-                print("SUCCESS: No missing values found")
+            # else:
+            #     print("SUCCESS: No missing values found")
             
             # Check for duplicate rows
             duplicates = df.duplicated().sum()
@@ -59,18 +105,18 @@ class ComplexityPredictor:
                 print(f"WARNING: Found {duplicates} duplicate rows, removing...")
                 df = df.drop_duplicates()
                 print(f"SUCCESS: After removing duplicates: {len(df)} samples")
-            else:
-                print("SUCCESS: No duplicate rows found")
+            # else:
+            #     print("SUCCESS: No duplicate rows found")
             
             # Data type validation
-            print("\nData types validation:")
-            for col in self.feature_columns:
-                if col in df.columns:
-                    print(f"  {col}: {df[col].dtype}")
+            # print("\nData types validation:")
+            # for col in self.feature_columns:
+            #     if col in df.columns:
+            #         print(f"  {col}: {df[col].dtype}")
             
             # Advanced outlier analysis
             numerical_features = ['no_of_ifs', 'no_of_loop', 'no_of_break', 'no_of_sort', 'nested_loop_depth']
-            print("\nOutlier analysis (IQR method):")
+            # print("\nOutlier analysis (IQR method):")
             for feature in numerical_features:
                 if feature in df.columns:
                     Q1 = df[feature].quantile(0.25)
@@ -78,10 +124,10 @@ class ComplexityPredictor:
                     IQR = Q3 - Q1
                     outliers = df[(df[feature] < Q1 - 1.5 * IQR) | (df[feature] > Q3 + 1.5 * IQR)]
                     outlier_percentage = len(outliers)/len(df)*100
-                    print(f"  {feature}: {len(outliers)} outliers ({outlier_percentage:.1f}%)")
+                    # print(f"  {feature}: {len(outliers)} outliers ({outlier_percentage:.1f}%)")
             
-            print(f"\nComplexity distribution:")
-            print(df['complexity'].value_counts())
+            # print("\nComplexity distribution:")
+            # print(df['complexity'].value_counts())
             
             return df
         except Exception as e:
@@ -90,44 +136,44 @@ class ComplexityPredictor:
     
     def prepare_features(self, df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
         """Prepare features and target for training with advanced preprocessing"""
-        print("\nAdvanced Feature Engineering:")
-        print("-" * 50)
+        # print("\nAdvanced Feature Engineering:")
+        # print("-" * 50)
         
         # Select feature columns
         X = df[self.feature_columns].copy()
         
         # Handle missing values with imputation
-        print("Applying missing value imputation...")
+        # print("Applying missing value imputation...")
         X_imputed = self.imputer.fit_transform(X)
         
         # Feature scaling (StandardScaler) for better model performance
-        print("Applying feature scaling (StandardScaler)...")
+        # print("Applying feature scaling (StandardScaler)...")
         X_scaled = self.scaler.fit_transform(X_imputed)
         
         # Encode complexity labels properly
-        print("Encoding complexity labels...")
+        # print("Encoding complexity labels...")
         y = df['complexity'].values
         y_encoded = self.label_encoder.fit_transform(y)
         
-        print(f"Original features shape: {X.shape}")
-        print(f"After imputation: {X_imputed.shape}")
-        print(f"After scaling: {X_scaled.shape}")
-        print(f"Target shape: {y_encoded.shape}")
+        # print(f"Original features shape: {X.shape}")
+        # print(f"After imputation: {X_imputed.shape}")
+        # print(f"After scaling: {X_scaled.shape}")
+        # print(f"Target shape: {y_encoded.shape}")
         
         # Feature statistics after scaling
-        print(f"\nFeature statistics (after scaling):")
-        for i, feature in enumerate(self.feature_columns):
-            print(f"  {feature}: mean={X_scaled[:, i].mean():.3f}, std={X_scaled[:, i].std():.3f}")
+        # print("\nFeature statistics (after scaling):")
+        # for i, feature in enumerate(self.feature_columns):
+        #     print(f"  {feature}: mean={X_scaled[:, i].mean():.3f}, std={X_scaled[:, i].std():.3f}")
         
-        # Label encoding mapping
-        print(f"\nLabel encoding mapping:")
-        for i, label in enumerate(self.label_encoder.classes_):
-            print(f"  {label} -> {i}")
+        # # Label encoding mapping
+        # # print("\nLabel encoding mapping:")
+        # for i, label in enumerate(self.label_encoder.classes_):
+        #     print(f"  {label} -> {i}")
         
         return X_scaled, y_encoded
     
     def train_model(self, csv_path: str, test_size: float = 0.2, random_state: int = 42, force_retrain: bool = False):
-        """Train the complexity prediction model"""
+        """Train multiple models (RF, SVM, NN, GB, KNN) and compare their performance"""
         # Check if model already exists and is recent
         if not force_retrain and os.path.exists(self.model_path):
             try:
@@ -138,9 +184,9 @@ class ComplexityPredictor:
             except:
                 print("Existing model corrupted, retraining...")
         
-        print("=" * 60)
-        print("Training Complexity Prediction Model")
-        print("=" * 60)
+        # print("=" * 60)
+        # print("Training Complexity Prediction Model")
+        # print("=" * 60)
         
         # Load dataset
         df = self.load_dataset(csv_path)
@@ -155,35 +201,118 @@ class ComplexityPredictor:
             X, y, test_size=test_size, random_state=random_state, stratify=y
         )
         
-        print(f"Training set: {X_train.shape[0]} samples")
-        print(f"Test set: {X_test.shape[0]} samples")
+        # print(f"Training set: {X_train.shape[0]} samples")
+        # print(f"Test set: {X_test.shape[0]} samples")
         
         # Train Random Forest model
-        print("\nTraining Random Forest model...")
-        self.model = RandomForestClassifier(
-            n_estimators=100,
-            random_state=random_state,
-            max_depth=10,
-            min_samples_split=5,
-            min_samples_leaf=2
-        )
+        # print("\nTraining Random Forest model...")
+        # self.model = RandomForestClassifier(
+        #     n_estimators=100,
+        #     random_state=random_state,
+        #     max_depth=10,
+        #     min_samples_split=5,
+        #     min_samples_leaf=2
+        # )
+
+        # Train (RF, SVM, NN, GB, KNN) models
+        models = {
+            "RandomForest": RandomForestClassifier(
+                n_estimators=100, random_state=random_state,
+                max_depth=10, min_samples_split=5, min_samples_leaf=2, class_weight='balanced', max_features='sqrt'
+            ),
+            "LinearSVM": SVC(kernel='rbf', probability=True, random_state=random_state, class_weight='balanced', C=1.0, gamma='scale'),
+            "NeuralNetwork": MLPClassifier(hidden_layer_sizes=(128, 64, 32), max_iter=2000, random_state=random_state),
+            "KNN": KNeighborsClassifier(n_neighbors=20)
+        }
+
+        results = {}
+        best_accuracy = 0
+        best_model_name = None
         
-        self.model.fit(X_train, y_train)
-        
-        # Evaluate model
-        y_pred = self.model.predict(X_test)
-        accuracy = accuracy_score(y_test, y_pred)
-        
-        print(f"\nModel Performance:")
-        print(f"Accuracy: {accuracy:.4f}")
-        print("\nClassification Report:")
-        print(classification_report(y_test, y_pred))
-        
+        # Train and evaluate all models
+        for name, model in models.items():
+            # print(f"\n{'-' * 50}\nTraining model: {name}")
+            model.fit(X_train, y_train)
+            y_pred = model.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+            # print(f"✅ {name} Accuracy: {accuracy:.4f}")
+            results[name] = accuracy
+
+            # Keep track of best model
+            if accuracy > best_accuracy:
+                best_accuracy = accuracy
+                best_model_name = name
+                self.model = model
+        print("-"*50)
+        print("\nML traniny models")
+        print("\nModel Comparison Results:")
+        for name, accuracy in results.items():
+            print(f"  {name}: {accuracy:.4f}")
+
+        print(f"\nBest model selected: {best_model_name} with accuracy {best_accuracy:.4f}")
+
+        # # Hybrid ensemble model (mix Random Forest + Neural Network + SVM)
+        # print(f"\n{'=' * 70}")
+        # print("🔸 Creating Hybrid Ensemble Model (RF + KNN + NN)")
+        # ensemble = VotingClassifier(
+        #     estimators=[
+        #         ('rf', models["RandomForest"]),
+        #         ('knn', models["KNN"]),
+        #         ('nn', models["NeuralNetwork"])
+        #     ],
+        #     voting='soft'
+        # )
+
+        # ensemble.fit(X_train, y_train)
+        # y_pred_ensemble = ensemble.predict(X_test)
+        # ensemble_accuracy = accuracy_score(y_test, y_pred_ensemble)
+        # print(f"✨ Hybrid Ensemble Accuracy: {ensemble_accuracy:.4f}")
+
+        # results["HybridEnsemble"] = ensemble_accuracy
+
+        # # Choose the final best model
+        # if ensemble_accuracy > best_accuracy:
+        #     print("🔹 Hybrid Ensemble selected as the final model.")
+        #     self.model = ensemble
+        #     best_model_name = "HybridEnsemble"
+        #     best_accuracy = ensemble_accuracy
+        # else:
+        #     print(f"🔹 {best_model_name} selected as the final model.")
+
+        # # Print comparison summary
+        # print(f"\n{'=' * 70}")
+        # print("📊 Model Comparison Summary")
+        # print("=" * 70)
+        # for model_name, acc in results.items():
+        #     print(f"{model_name:<20} : {acc:.4f}")
+        # print(f"\n🏆 Best Model: {best_model_name} with Accuracy = {best_accuracy:.4f}")
+
+        # Evaluate final model
+        y_pred_final = self.model.predict(X_test)
+        print("\nFinal Model Classification Report:")
+        print(classification_report(y_test, y_pred_final))
+
         # Save model
         self.save_model()
-        
-        print(f"\nModel saved to: {self.model_path}")
+        print("Final model saved Successfully.")
         return True
+
+        # self.model.fit(X_train, y_train)
+        
+        # # Evaluate model
+        # y_pred = self.model.predict(X_test)
+        # accuracy = accuracy_score(y_test, y_pred)
+        
+        # print("\nModel Performance:")
+        # print(f"Accuracy: {accuracy:.4f}")
+        # print("\nClassification Report:")
+        # print(classification_report(y_test, y_pred))
+        
+        # # Save model
+        # self.save_model()
+        
+        # print(f"\nModel saved to: {self.model_path}")
+        # return True
     
     def save_model(self):
         """Save the trained model and preprocessing objects"""
@@ -196,7 +325,7 @@ class ComplexityPredictor:
                 'imputer': self.imputer
             }
             joblib.dump(model_data, self.model_path)
-            print("SUCCESS: Model and preprocessing objects saved successfully!")
+            # print("SUCCESS: Model and preprocessing objects saved successfully!")
         else:
             print("ERROR: No model to save!")
     
@@ -233,30 +362,49 @@ class ComplexityPredictor:
                 return {"error": "No trained model available"}
         
         try:
-            # Prepare feature vector in the same order as training
-            feature_vector = np.array([[
-                features.get('no_of_ifs', 0),
-                features.get('no_of_loop', 0),
-                features.get('no_of_break', 0),
-                features.get('priority_queue_present', 0),
-                features.get('no_of_sort', 0),
-                features.get('hash_set_present', 0),
-                features.get('hash_map_present', 0),
-                features.get('recursion_present', 0),
-                features.get('nested_loop_depth', 0)
-            ]])
+            # # Prepare feature vector in the same order as training
+            # feature_vector = np.array([[
+            #     features.get('no_of_ifs', 0),
+            #     features.get('no_of_loop', 0),
+            #     features.get('no_of_break', 0),
+            #     features.get('priority_queue_present', 0),
+            #     features.get('no_of_sort', 0),
+            #     features.get('hash_set_present', 0),
+            #     features.get('hash_map_present', 0),
+            #     features.get('recursion_present', 0),
+            #     features.get('nested_loop_depth', 0)
+            # ]])
+
+            # Build a DataFrame with EXACT SAME columns as training
+            X = pd.DataFrame([{
+                'no_of_ifs': features.get('no_of_ifs', 0),
+                'no_of_loop': features.get('no_of_loop', 0),
+                'no_of_break': features.get('no_of_break', 0),
+                'priority_queue_present': features.get('priority_queue_present', 0),
+                'no_of_sort': features.get('no_of_sort', 0),
+                'hash_set_present': features.get('hash_set_present', 0),
+                'hash_map_present': features.get('hash_map_present', 0),
+                'recursion_present': features.get('recursion_present', 0),
+                'nested_loop_depth': features.get('nested_loop_depth', 0)
+            }], columns=self.feature_columns)
             
             # Apply same preprocessing as training
             feature_vector_imputed = self.imputer.transform(feature_vector)
             feature_vector_scaled = self.scaler.transform(feature_vector_imputed)
             
+            # Apply imputer and scaler (no warnings now)
+            X_imputed = self.imputer.transform(X)
+            X_scaled = self.scaler.transform(X_imputed)
+
             # Make prediction
-            prediction_encoded = self.model.predict(feature_vector_scaled)[0]
-            probabilities = self.model.predict_proba(feature_vector_scaled)[0]
-            
+            prediction_encoded = self.model.predict(X_scaled)[0]
+            probabilities = self.model.predict_proba(X_scaled)[0]
+
             # Decode prediction back to original label
+            # prediction = self.label_encoder.inverse_transform([prediction_encoded])[0]
             prediction = self.label_encoder.inverse_transform([prediction_encoded])[0]
-            
+
+
             # Get class names and probabilities
             class_names = self.label_encoder.classes_
             prob_dict = {class_names[i]: probabilities[i] for i in range(len(class_names))}
