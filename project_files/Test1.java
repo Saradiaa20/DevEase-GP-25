@@ -1,36 +1,28 @@
-
-
 public class Test1 {
-    private int accountNumber;
+    private int studentId;
     private String name;
-    private float amount;
-    
-    public void insert(int a, String n, float amt){
-        this.accountNumber = a;
+    private float gpa;
+
+    public void register(int id, String n, float gpa){
+        this.studentId = id;
         this.name = n;
-        this.amount = amt;
+        this.gpa = gpa;
     }
-    
-    public void deposit(float amt){
-        this.amount = this.amount + amt;
-    }
-    
-    public void withDraw(float amt){
-        if(this.amount < amt){
-            System.out.println("Can't proceed");
-        }
-        else{
-            this.amount = this.amount - amt;
+
+    public void updateGPA(float newGpa){
+        if(newGpa < 0 || newGpa > 4){
+            System.out.println("Invalid GPA");
+        } else {
+            this.gpa = newGpa;
         }
     }
-    
-    public void checkBalance(){
-        System.out.println("Your balance is: " + this.amount);
+
+    public void showInfo(){
+        System.out.println("Student: " + name + ", GPA: " + gpa);
     }
 
     @Override
     public String toString() {
-        return "Accounts{" + "accountNumber=" + accountNumber + ", name=" + name + ", amount=" + amount + '}';
+        return "Test1{" + "studentId=" + studentId + ", name=" + name + ", gpa=" + gpa + '}';
     }
-    
 }

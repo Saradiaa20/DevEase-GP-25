@@ -1,25 +1,32 @@
 public class Test2 {
+    private int productId;
+    private String productName;
+    private int quantity;
 
-    public void doSomething(int x){
-        int y=0,z=1;
-        for(int i=0;i<10;i++){
-            if(i%x==0){
-                y=y+z;
-            }else{
-                y=y+i*3+7; // magic numbers everywhere
-            }
+    public void addProduct(int id, String name, int qty){
+        this.productId = id;
+        this.productName = name;
+        this.quantity = qty;
+    }
+
+    public void increaseStock(int qty){
+        this.quantity += qty;
+    }
+
+    public void decreaseStock(int qty){
+        if(this.quantity < qty){
+            System.out.println("Not enough stock!");
+        } else {
+            this.quantity -= qty;
         }
+    }
 
-        System.out.println("Result is: "+y);
+    public void checkStock(){
+        System.out.println("Current stock: " + this.quantity);
+    }
 
-        // pointless unused variables
-        String a = "hello";
-        int b = 55;
-        double d = 3.14159;
-
-        if(x>5)
-            System.out.println("ok");
-        else
-            System.out.println("not ok"); // duplicated logic with no reason
+    @Override
+    public String toString() {
+        return "Test2{" + "productId=" + productId + ", productName=" + productName + ", quantity=" + quantity + '}';
     }
 }
