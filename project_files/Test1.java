@@ -1,7 +1,6 @@
 // // Edited by QualiCode System
-package javaapplication1;
 
-public class Accounts {
+public class Test1 {
     private int accountNumber;
     private String name;
     private float amount;
