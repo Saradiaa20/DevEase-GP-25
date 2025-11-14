@@ -1,58 +1,30 @@
-package com.example.aswe.microservice.models;
+public class Test2 {
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+    public void doSomething(int x){
+        int y=0,z=1;
+        for(int i=0;i<10;i++){
+            if(i%x==0){
+                y=y+z;
+            }else{
+                y=y+i*3+7; // magic numbers everywhere
+            }
+        }
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Objects;
+        System.out.println("Result is: "+y);
 
+        // pointless unused variables
+        String a = "hello";
+        int b = 55;
+        double d = 3.14159;
 
-@Entity
-@Table(name = "events")
-public class Event {
+        if(x>5)
+            System.out.println("ok");
+        else
+            System.out.println("not ok"); // duplicated logic with no reason
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String title;
-    private LocalDate date;
-    private LocalTime time;
-    private String description;
-    private String color;
-
-    // Constructors
-    public Event() {}
-
-    public Event(String title, LocalDate date, LocalTime time, String description, String color) {
-        this.title = title;
-        this.date = date;
-        this.time = time;
-        this.description = description;
-        this.color = color;
+        // dead code
+        if(false){
+            System.out.println("Never executed");
+        }
     }
-
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-
-    public LocalDate getDate() { return date; }
-    public void setDate(LocalDate date) { this.date = date; }
-
-    public LocalTime getTime() { return time; }
-    public void setTime(LocalTime time) { this.time = time; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
-    public String getColor() { return color; }
-    public void setColor(String color) { this.color = color; }
-
 }
