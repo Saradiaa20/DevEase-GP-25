@@ -1,5 +1,5 @@
 // // Edited by QualiCode System
- package javaapplication1;
+package javaapplication1;
 
 public class Accounts {
     private int accountNumber;
