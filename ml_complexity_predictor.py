@@ -244,7 +244,7 @@ class ComplexityPredictor:
                 best_model_name = name
                 self.model = model
         print("-"*50)
-        print("\nML traniny models")
+        print("\nML tranined models")
         print("\nModel Comparison Results:")
         for name, accuracy in results.items():
             print(f"  {name}: {accuracy:.4f}")
@@ -496,10 +496,10 @@ class ComplexityPredictor:
         print(f"Description: {prediction_result['complexity_description']}")
         print(f"Confidence: {prediction_result['confidence']:.2%}")
         
-        print("\nAll Complexity Probabilities:")
-        for complexity, prob in prediction_result['all_probabilities'].items():
-            desc = self.complexity_mapping.get(complexity, complexity)
-            print(f"  {desc}: {prob:.2%}")
+        # print("\nAll Complexity Probabilities:")
+        # for complexity, prob in prediction_result['all_probabilities'].items():
+        #     desc = self.complexity_mapping.get(complexity, complexity)
+        #     print(f"  {desc}: {prob:.2%}")
 
 def main():
     """Main function to train the model"""

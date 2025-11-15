@@ -118,11 +118,11 @@ class CodeSmellDetector:
         """Detect general code smells that apply to all languages"""
         self._detect_long_lines(content)
         self._detect_large_files(content)
-        self._detect_comments_ratio(content)
+        # self._detect_comments_ratio(content)
         self._detect_todo_comments(content)
-        self._detect_dead_code_general(content)
+        # self._detect_dead_code_general(content)
         self._detect_duplicate_strings(content)
-        self._detect_hardcoded_values(content)
+        # self._detect_hardcoded_values(content)
     
     # Python-specific smell detection methods
     def _detect_long_functions(self, tree):
