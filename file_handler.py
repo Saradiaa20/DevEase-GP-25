@@ -2,6 +2,8 @@ import os
 import shutil
 import sys
 from parsing import ASTParser
+# from file_handler import FileHandler, analyze_file
+
 
 class FileHandler:
     SUPPORTED_EXTENSIONS = ['.java', '.py', '.js', '.cpp', '.cs', '.php']
@@ -121,9 +123,9 @@ def analyze_file(file_path, handler, parser):
         return False
 
 def main():
-    """Main DevEase application with integrated workflow"""
+    """Main DevEase application with corrected logic"""
     print("-" * 60)
-    print("    DevEase - Enhancment developer User experience Tool")
+    print("    DevEase - Code Quality Analysis Tool")
     print("-" * 60)
     print()
     
@@ -133,38 +135,24 @@ def main():
     
     # Auto-train ML model on startup
     dataset_path = os.path.join(os.path.dirname(__file__), "dataset1.csv")
-
     
-    if os.path.exists(dataset_path): 
-        # print(f"Found dataset: {dataset_path}")
-        # print("Training ML model for complexity prediction...")
-        # success = parser.complexity_predictor.train_model(dataset_path, force_retrain=True)
-
+    if os.path.exists(dataset_path):
+        print("Training ML model for complexity prediction...")
         parser.complexity_predictor.verify_preprocessing(dataset_path)
         success = parser.complexity_predictor.train_model(dataset_path, force_retrain=True)
-
+        
         if success:
-            print("model trained Successfully.")
+            print("Model trained successfully.\n")
         else:
-            print("WARNING: ML model training failed, but system will continue...")
+            print("WARNING: ML model training failed, but system will continue...\n")
     else:
         print(f"WARNING: Dataset not found at {dataset_path}")
-        print("ML complexity prediction will not be available.")
+        print("ML complexity prediction will not be available.\n")
     
-    print()
-    
-    # Check if file path provided as command line argument
-    if len(sys.argv) > 1:
-        file_path = sys.argv[1]
-        print(f"Command Line Mode: Analyzing {file_path}")
-        analyze_file(file_path, handler, parser)
-        return
-    
-
-    # Interactive mode
+    # Main interactive loop
     while True:
         print("-" * 50)
-        print("\n Welcome to DevEase ")
+        print("\nWelcome to DevEase")
         print("1. Upload a new file")
         print("2. Choose a saved file")
         print("3. Exit")
@@ -173,23 +161,32 @@ def main():
             choice = input("\nEnter choice: ").strip()
             
             if choice == "1":
+                # Upload and analyze new file
                 file_path = input("Enter the full path of the code file: ").strip()
-                if file_path:
-                    analyze_file(file_path, handler, parser)
-                    
+                
+                if not file_path:
+                    print("ERROR: No file path provided!")
+                    continue
+                
+                # Perform complete analysis using the analyze_file function
+                success = analyze_file(file_path, handler, parser)
+                
+                if success:
                     # Ask if user wants to save the file
                     save = input("\nSave this file locally? (y/n): ").lower()
                     if save == 'y':
-                        handler.save_to_local_folder(file_path)
-                        print("SUCCESS: File saved successfully!")
-                else:
-                    print("ERROR: No file path provided!")
+                        try:
+                            handler.save_to_local_folder(file_path)
+                            print("File saved successfully!")
+                        except Exception as e:
+                            print(f"Error saving file: {e}")
             
             elif choice == "2":
+                # Choose from saved files
                 files = os.listdir(handler.storage_folder)
                 if not files:
                     print("\nERROR: No saved files found!")
-                    continue
+                    continue 
                 
                 print("\nSaved files:")
                 for i, file in enumerate(files, 1):
@@ -200,6 +197,8 @@ def main():
                     if 0 <= idx < len(files):
                         selected_file = files[idx]
                         file_path = handler.get_saved_path(selected_file)
+                        
+                        # Perform complete analysis
                         analyze_file(file_path, handler, parser)
                     else:
                         print("ERROR: Invalid file number!")
@@ -207,17 +206,19 @@ def main():
                     print("ERROR: Please enter a valid number!")
             
             elif choice == "3":
-                print("\nSUCCESS: Exit System Successfully.")
+                print("\nThank you for using DevEase.")
                 break
             
             else:
                 print("ERROR: Invalid choice! Please enter 1, 2, or 3.")
         
         except KeyboardInterrupt:
-            print("\n\nSUCCESS: Exit System Successfully.")
-            break
-        except Exception as e:
+            print("\n\nExiting DevEase. Goodbye!")
+            break  
+        except FileNotFoundError as e:
             print(f"ERROR: {e}")
+        except Exception as e:
+            print(f"ERROR: An unexpected error occurred: {e}")
 
 if __name__ == "__main__":
     main()
