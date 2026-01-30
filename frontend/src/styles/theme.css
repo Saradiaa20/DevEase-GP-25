@@ -1,0 +1,207 @@
+/* Cyber Vibes Theme - Dark mode with neon accents */
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Dark Background Colors */
+  --bg-primary: #0a0e27;
+  --bg-secondary: #141b2d;
+  --bg-card: #1a2332;
+  --bg-card-hover: #202835;
+  
+  /* Accent Colors */
+  --accent-cyan: #00d9ff;
+  --accent-blue: #3b82f6;
+  --accent-green: #10b981;
+  --accent-yellow: #fbbf24;
+  --accent-orange: #f59e0b;
+  --accent-red: #ef4444;
+  --accent-pink: #ec4899;
+  --accent-purple: #8b5cf6;
+  
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #a0aec0;
+  --text-muted: #718096;
+  
+  /* Border Colors */
+  --border-primary: #2d3748;
+  --border-accent: #3b82f6;
+  
+  /* Gradients */
+  --gradient-cyan: linear-gradient(135deg, #00d9ff 0%, #3b82f6 100%);
+  --gradient-purple: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  --gradient-dark: linear-gradient(135deg, #0a0e27 0%, #141b2d 100%);
+}
+
+/* Glow effects */
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+}
+
+.glow-blue {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.glow-green {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+/* Cyber button styles */
+.btn-cyber {
+  background: var(--bg-card);
+  border: 1px solid var(--border-accent);
+  color: var(--accent-cyan);
+  transition: all 0.3s ease;
+}
+
+.btn-cyber:hover {
+  background: var(--accent-blue);
+  color: var(--text-primary);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+  transform: translateY(-2px);
+}
+
+.btn-cyber-primary {
+  background: var(--gradient-cyan);
+  border: none;
+  color: var(--text-primary);
+}
+
+.btn-cyber-primary:hover {
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.6);
+}
+
+/* Card styles */
+.card-cyber {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.card-cyber:hover {
+  border-color: var(--border-accent);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Text styles */
+.text-cyber-cyan {
+  color: var(--accent-cyan);
+}
+
+.text-cyber-green {
+  color: var(--accent-green);
+}
+
+.text-cyber-yellow {
+  color: var(--accent-yellow);
+}
+
+.text-cyber-red {
+  color: var(--accent-red);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-accent);
+}
+
+/* ---------------------------------------------------------------------------
+   Light theme (data-theme is set on <html> by SettingsContext)
+   --------------------------------------------------------------------------- */
+html[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #e2e8f0;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --border-primary: #cbd5e1;
+  --border-accent: #0ea5e9;
+  --accent-cyan: #0891b2;
+  --accent-blue: #2563eb;
+  --gradient-cyan: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  --gradient-dark: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
+/* Theme-aware layout (use these on nav/sidebar so they follow theme) */
+.theme-bg-secondary {
+  background: var(--bg-secondary);
+}
+.theme-border {
+  border-color: var(--border-primary);
+}
+.theme-text-primary { color: var(--text-primary); }
+.theme-text-muted { color: var(--text-muted); }
+.theme-bg-card { background: var(--bg-card); }
+.theme-nav-link {
+  color: var(--text-muted);
+}
+.theme-nav-link:hover {
+  color: var(--text-primary);
+}
+.theme-hover-bg:hover {
+  background: var(--bg-card);
+}
+
+/* ---------------------------------------------------------------------------
+   Dyslexia-friendly font (Lexend – readable, often used for accessibility)
+   --------------------------------------------------------------------------- */
+html.dyslexia-font,
+html.dyslexia-font body,
+html.dyslexia-font * {
+  font-family: 'Lexend', ui-sans-serif, system-ui, sans-serif !important;
+}
+
+/* ---------------------------------------------------------------------------
+   High contrast
+   --------------------------------------------------------------------------- */
+html.high-contrast {
+  --text-primary: #ffffff;
+  --text-secondary: #e5e7eb;
+  --text-muted: #d1d5db;
+  --border-primary: #4b5563;
+  --border-accent: #22d3ee;
+  --bg-primary: #0c0c0c;
+  --bg-secondary: #171717;
+  --bg-card: #262626;
+  --bg-card-hover: #404040;
+}
+html.high-contrast[data-theme="light"] {
+  /* when both light + high contrast, keep light surfaces but max contrast */
+  --text-primary: #000000;
+  --text-secondary: #1f2937;
+  --text-muted: #374151;
+  --border-primary: #111827;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f3f4f6;
+  --bg-card: #ffffff;
+  --bg-card-hover: #e5e7eb;
+}
+
+/* ---------------------------------------------------------------------------
+   Focus mode – reduce distraction (dim non-essential UI, stronger focus ring)
+   --------------------------------------------------------------------------- */
+html.focus-mode .focus-mode-hide {
+  opacity: 0.4;
+  pointer-events: none;
+}
+html.focus-mode *:focus-visible {
+  outline: 3px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
