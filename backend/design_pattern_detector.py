@@ -6,12 +6,14 @@ Detects design patterns (Creational, Structural, Behavioral) from Java code usin
 import os
 import glob
 import re
-import ast
+import tempfile
+import zipfile
 import numpy as np
 import pandas as pd
 from typing import Dict, List, Any, Optional, Tuple
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 import joblib
+import requests
 
 # Try to import TensorFlow, fall back to sklearn if not available
 try:
@@ -38,6 +40,9 @@ class DesignPatternDetector:
     BEHAVIORAL = ['Chain_of_responsibility', 'Command', 'Interpreter', 'Iterator', 
                   'Mediator', 'Memento', 'Observer', 'State', 'Strategy', 'Template', 'Visitor']
     
+    # Dataset URL (Dropbox direct download link)
+    DATASET_URL = "https://www.dropbox.com/scl/fi/rfpkpzishrr944ym043gh/Dp_data.zip?rlkey=7v0cy3p1xhr2cdhpgkzjzf05f&st=jduli9hs&dl=1"
+    
     # CK Metrics features used by the model
     CK_FEATURES = [
         'cbo', 'cboModified', 'fanin', 'fanout', 'wmc', 'dit', 'noc', 'rfc',
@@ -55,7 +60,9 @@ class DesignPatternDetector:
         'logStatementsQty'
     ]
     
-    def __init__(self, model_path: str = "design_pattern_model"):
+    def __init__(self, model_path: str = None):
+        if model_path is None:
+            model_path = os.path.join(os.path.dirname(__file__), "design_pattern_model")
         self.model_path = model_path
         self.model = None
         self.scaler = StandardScaler()
@@ -73,6 +80,36 @@ class DesignPatternDetector:
             return 'Structural'
         else:
             return 'Behavioral'
+    
+    def _download_and_extract_dataset(self) -> str:
+        """Download dataset from URL and extract to temp directory"""
+        print("Downloading design pattern dataset...")
+        
+        # Create temp directory
+        temp_dir = tempfile.mkdtemp()
+        zip_path = os.path.join(temp_dir, "Dp_data.zip")
+        
+        # Download the file
+        response = requests.get(self.DATASET_URL, stream=True)
+        if response.status_code == 200:
+            with open(zip_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            print("Download complete!")
+        else:
+            raise Exception(f"Failed to download dataset: {response.status_code}")
+        
+        # Extract the ZIP file
+        extract_dir = os.path.join(temp_dir, "Dp_data")
+        if zipfile.is_zipfile(zip_path):
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(extract_dir)
+            print(f"Extracted to {extract_dir}")
+        else:
+            raise Exception("Downloaded file is not a valid ZIP file")
+        
+        # Return the path to the data
+        return os.path.join(extract_dir, "Dp_data")
     
     def _extract_code_features(self, code_content: str, language: str = 'java') -> Dict[str, float]:
         """
@@ -406,6 +443,22 @@ class DesignPatternDetector:
             
         return min(score, 1.0)
     
+    def _prepare_features_for_ml(self, features: Dict) -> np.ndarray:
+        """Convert extracted features to array format for ML model"""
+        # Use the same feature columns that were used during training
+        if self.feature_columns is None:
+            # Default feature columns based on method.csv structure
+            return None
+            
+        feature_values = []
+        for col in self.feature_columns:
+            if col in features:
+                feature_values.append(features[col])
+            else:
+                feature_values.append(0)  # Default value for missing features
+        
+        return np.array([feature_values])
+    
     def predict_pattern(self, code_content: str, language: str = 'java') -> Dict[str, Any]:
         """
         Predict design pattern category from code
@@ -414,6 +467,72 @@ class DesignPatternDetector:
         # Extract features
         features = self._extract_code_features(code_content, language)
         
+        # If ML model is loaded, use it for prediction
+        if self._model_loaded and self.model is not None:
+            return self._predict_with_ml(features, code_content)
+        
+        # Fall back to heuristic-based prediction
+        return self._predict_with_heuristics(features, code_content)
+    
+    def _predict_with_ml(self, features: Dict, code_content: str) -> Dict[str, Any]:
+        """Make prediction using trained ML model"""
+        # Prepare features for the model
+        X = self._prepare_features_for_ml(features)
+        
+        if X is None or self.scaler is None:
+            return self._predict_with_heuristics(features, code_content)
+        
+        try:
+            # Scale features
+            X_scaled = self.scaler.transform(X)
+            
+            # Make prediction
+            if TENSORFLOW_AVAILABLE:
+                y_pred = self.model.predict(X_scaled, verbose=0)
+                predicted_idx = np.argmax(y_pred, axis=1)[0]
+                confidence = float(y_pred[0][predicted_idx])
+                category_scores = {
+                    cls: float(y_pred[0][i]) 
+                    for i, cls in enumerate(self.label_encoder.classes_)
+                }
+            else:
+                y_pred = self.model.predict_proba(X)
+                predicted_idx = np.argmax(y_pred, axis=1)[0]
+                confidence = float(y_pred[0][predicted_idx])
+                category_scores = {
+                    cls: float(y_pred[0][i]) 
+                    for i, cls in enumerate(self.label_encoder.classes_)
+                }
+            
+            predicted = self.label_encoder.classes_[predicted_idx]
+            
+            # Detect specific patterns
+            specific_patterns = self._detect_specific_patterns(features, code_content)
+            
+            # Suggest a specific pattern
+            suggested_pattern = self._suggest_specific_pattern(predicted, features, code_content, specific_patterns)
+            
+            return {
+                'predicted_category': predicted,
+                'confidence': round(confidence, 3),
+                'category_scores': {k: round(v, 3) for k, v in category_scores.items()},
+                'detected_patterns': specific_patterns,
+                'suggested_pattern': suggested_pattern,
+                'features': {
+                    'loc': features.get('loc', 0),
+                    'methods': features.get('totalMethodsQty', 0),
+                    'fields': features.get('totalFieldsQty', 0),
+                    'complexity': features.get('wmc', 0),
+                    'coupling': features.get('cbo', 0),
+                    'cohesion': features.get('lcom', 0)
+                }
+            }
+        except Exception as e:
+            print(f"ML prediction failed: {e}, falling back to heuristics")
+            return self._predict_with_heuristics(features, code_content)
+    
+    def _predict_with_heuristics(self, features: Dict, code_content: str) -> Dict[str, Any]:
+        """Make prediction using heuristic rules"""
         # Calculate pattern scores
         pattern_scores = {
             'Creational': 0.0,
@@ -661,9 +780,11 @@ class DesignPatternDetector:
     def train_model(self, data_path: str = None):
         """
         Train the design pattern detection model using CK metrics
+        Downloads dataset from URL if not provided
         """
+        # Download dataset if path not provided
         if data_path is None:
-            data_path = os.path.join(os.path.dirname(__file__), 'Dp_data', 'Dp_data')
+            data_path = self._download_and_extract_dataset()
         
         tr_path = os.path.join(data_path, 'Dp_trainset')
         te_path = os.path.join(data_path, 'Dp_testset')
@@ -675,14 +796,18 @@ class DesignPatternDetector:
         print("Loading training data...")
         
         # Get method.csv files
-        tr_files = glob.glob(os.path.join(tr_path, "**", "*method.csv"), recursive=True)
-        te_files = glob.glob(os.path.join(te_path, "**", "*method.csv"), recursive=True)
+        # Path structure: Dp_trainset/Pattern_name/project_name/ckmetrics/method.csv
+        # Need to go up 3 levels to get Pattern_name (not project_name)
+        tr_files = [(f, os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(f))))) 
+                    for f in glob.glob(os.path.join(tr_path, "**", "*method.csv"), recursive=True)]
+        te_files = [(f, os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(f))))) 
+                    for f in glob.glob(os.path.join(te_path, "**", "*method.csv"), recursive=True)]
         
         print(f"Found {len(tr_files)} training files, {len(te_files)} test files")
         
         # Process files
-        trainset = self._process_metric_files(tr_files, tr_path)
-        testset = self._process_metric_files(te_files, te_path)
+        trainset = self._process_metric_files(tr_files)
+        testset = self._process_metric_files(te_files)
         
         if trainset is None or len(trainset) == 0:
             print("No valid training data")
@@ -747,11 +872,11 @@ class DesignPatternDetector:
         
         return True
     
-    def _process_metric_files(self, files: List[str], base_path: str) -> pd.DataFrame:
+    def _process_metric_files(self, files: List[Tuple[str, str]]) -> pd.DataFrame:
         """Process CK metric files into a dataset"""
         data_frames = []
         
-        for file_path in files:
+        for file_path, pattern_name in files:
             try:
                 df = pd.read_csv(file_path)
                 
@@ -763,20 +888,22 @@ class DesignPatternDetector:
                 if df.empty:
                     continue
                 
-                # Fill missing values
-                df = df.fillna(0)
+                # Fill missing values with mode or 0
+                for col in df.columns:
+                    if df[col].isna().any():
+                        mode_val = df[col].mode()
+                        df[col].fillna(mode_val.iloc[0] if len(mode_val) > 0 else 0, inplace=True)
                 
                 # Sum numeric columns to get aggregate metrics
                 numeric_cols = df.select_dtypes(include=[np.number]).columns
                 agg_row = df[numeric_cols].sum()
                 
-                # Get pattern name from directory structure
-                rel_path = os.path.relpath(file_path, base_path)
-                pattern_name = rel_path.split(os.sep)[0]
+                # Get pattern category
+                category = self._get_category(pattern_name)
                 
                 # Create single row DataFrame
                 row_df = pd.DataFrame([agg_row])
-                row_df['Design Pattern'] = self._get_category(pattern_name)
+                row_df['Design Pattern'] = category
                 
                 data_frames.append(row_df)
                 
@@ -818,6 +945,8 @@ class DesignPatternDetector:
                 self.scaler = model_data['scaler']
                 self.label_encoder = model_data['label_encoder']
                 self.feature_columns = model_data.get('feature_columns')
+            else:
+                return False
             
             # Try loading TensorFlow model
             keras_path = f"{self.model_path}.keras"
@@ -862,6 +991,11 @@ def main():
     """Test the design pattern detector"""
     detector = DesignPatternDetector()
     
+    # Try to load existing model
+    if not detector.load_model():
+        print("No trained model found. Training new model...")
+        detector.train_model()
+    
     # Test with sample Singleton code
     singleton_code = '''
     public class Singleton {
@@ -878,7 +1012,7 @@ def main():
     }
     '''
     
-    print("Testing Singleton pattern detection:")
+    print("\nTesting Singleton pattern detection:")
     result = detector.predict_pattern(singleton_code)
     print(f"Predicted: {result['predicted_category']} (confidence: {result['confidence']:.2f})")
     print(f"Detected patterns: {result['detected_patterns']}")
