@@ -1,10 +1,160 @@
-# DevEase - Code Analysis Tool
+🚀 DevEase
+AI-Powered Code Analysis & Developer Experience Platform
 
-## Setup
+DevEase is an intelligent coding assistant designed to help developers improve code quality, reduce technical debt, and better understand their code through AI-driven analysis and accessibility-focused features.
 
-### Backend
+📌 Overview
+DevEase combines AST parsing, machine learning, and natural language processing (NLP) to analyze source code deeply and provide:
+
+Code smell detection
+
+Unsafe code detection
+
+Technical debt estimation
+
+Design pattern suggestions
+
+Human-readable explanations
+
+Unlike traditional tools, DevEase focuses on developer experience and accessibility, making it easier for all developers to understand and improve their code.
+
+🎯 Key Features
+🔍 Code Analysis
+Abstract Syntax Tree (AST) parsing
+
+Feature extraction from code structure
+
+Detection of:
+
+Code smells
+
+Unsafe patterns
+
+Design issues
+
+🤖 AI-Powered Insights
+Machine learning-based detection
+
+NLP-generated explanations (simple English)
+
+Smart fix suggestions
+
+📊 Technical Debt
+Calculates maintainability score
+
+Provides clear metrics and visualizations
+
+🧠 Developer Assistance
+Simplifies complex errors
+
+Suggests improvements & design patterns
+
+♿ Accessibility First
+Adaptive UI (low vision, etc.)
+
+Reduced cognitive load
+
+Custom themes and modes
+
+👥 User Roles
+Developer
+
+Upload code
+
+View analysis results
+
+Apply fixes
+
+Team Leader
+
+Manage projects
+
+Monitor team insights
+
+Access advanced analytics
+
+⚙️ Tech Stack
+🖥️ Backend
+Python 3.8+ (recommended 3.11 , 3.12)
+
+FastAPI
+
+Uvicorn
+
+Scikit-learn
+
+Pandas / NumPy
+
+🌐 Frontend
+React 18
+
+Vite
+
+Tailwind CSS
+
+Axios
+
+🧠 AI & Analysis
+AST Parsing (Python & Java)
+
+Machine Learning models
+
+NLP for explanations
+
+📡 API Endpoints 
+Authentication
+POST /api/auth/register
+POST /api/auth/login
+Projects
+POST /api/projects
+GET /api/projects
+GET /api/projects/{id}
+Analysis
+POST /api/analyze/file
+POST /api/analyze/content
+GET /api/analysis/technical-debt
+🚀 Getting Started
+1. Clone the repository
+git clone https://github.com/Saradiaa20/DevEase-GP-25.git
+cd DevEase-GP-25
+2. Backend Setup
 cd backend
+python -m venv venv
+source venv/bin/activate   # or venv\Scripts\activate (Windows)
 pip install -r requirements.txt
 python -m app.main
- 
- nnn
+3. Frontend Setup
+cd frontend
+npm install
+npm run dev
+📊 Supported Languages
+Python
+
+Java
+
+🧪 Testing
+Unit & integration testing based on:
+
+Authentication
+
+File upload
+
+Code analysis
+
+Handles:
+
+Invalid files
+
+Unsupported formats
+
+Incorrect credentials
+
+💡 Why DevEase?
+DevEase bridges the gap between:
+
+Powerful code analysis
+
+Human-friendly explanations
+
+Inclusive developer experience
+
