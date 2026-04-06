@@ -86,4 +86,61 @@ Unlike traditional tools, DevEase focuses on **developer experience and accessib
 
 ## 📡 API Endpoints
 
-### 🔐 Authentication
+###  Authentication
+POST /api/auth/register
+POST /api/auth/login
+
+###  Projects
+POST /api/projects
+GET /api/projects
+GET /api/projects/{id}
+
+### Analysis
+POST /api/analyze/file
+POST /api/analyze/content
+GET /api/analysis/technical-debt
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the repository
+git clone https://github.com/Saradiaa20/DevEase-GP-25.git
+cd DevEase-GP-25
+### 2. Backend Setup
+cd backend
+python -m venv venv
+source venv/bin/activate   # or venv\Scripts\activate (Windows)
+pip install -r requirements.txt
+python -m app.main
+### 3. Frontend Setup
+cd frontend
+npm install
+npm run dev
+
+---
+
+## 📊 Supported Languages
+- Python
+- Java
+
+---
+
+## 🧪 Testing
+### Unit & integration testing based on:
+- Authentication
+-File upload
+-Code analysis
+### Handles:
+- Invalid files
+- Unsupported formats
+- Incorrect credentials
+---
+## 💡 Why DevEase?
+### DevEase bridges the gap between:
+
+- Powerful code analysis
+- Human-friendly explanations
+- Inclusive developer experience
+
+
