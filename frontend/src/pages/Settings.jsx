@@ -7,7 +7,7 @@ function Settings() {
 
   const presets = [
     { id: 'default', name: 'Default' },
-    { id: 'dyslexia', name: 'Dyslexia' },
+    // { id: 'dyslexia', name: 'Dyslexia' },
     { id: 'lowVision', name: 'Low Vision' },
     { id: 'adhdFocus', name: 'ADHD Focus' },
   ]
@@ -56,12 +56,12 @@ function Settings() {
         <div className="cyber-card">
           <h2 className="text-xl font-semibold theme-text-primary mb-4">Accessibility Options</h2>
           <div className="space-y-4">
-            <ToggleOption
+            {/* <ToggleOption
               label="Dyslexic-Friendly Font"
               description="Use fonts optimized for dyslexia"
               checked={settings.dyslexicFont}
               onChange={() => handleToggle('dyslexicFont')}
-            />
+            /> */}
             <ToggleOption
               label="High Contrast Mode"
               description="Increase contrast for better visibility"
@@ -90,7 +90,7 @@ function Settings() {
                   : 'theme-bg-card theme-border theme-text-muted hover:border-cyan-500/50'
               }`}
             >
-              Dark Mode (Cyber Vibes)
+              Dark Mode
               {settings.theme === 'dark' && <span className="ml-2 text-xs">✓ Selected</span>}
             </button>
             <button
