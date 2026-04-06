@@ -82,7 +82,7 @@ function Dashboard() {
 
     const debtScore = technicalDebt?.total_debt_score || 0
     const estimatedHours = technicalDebt?.estimated_hours || 0
-    const totalSmells = codeSmells?.total_smells || 0
+    const totalSmells = codeSmells?.length || 0
     const overallQuality = qualityScore?.overall_score || 0
     
     return {

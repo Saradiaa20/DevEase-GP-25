@@ -62,9 +62,9 @@ function AnalysisResults({ data }) {
           )}
 
           {/* Code Smells */}
-          {data.code_smells && data.code_smells.total_smells > 0 && (
-            <CodeSmellsList smells={data.code_smells} />
-          )}
+          {data.code_smells && data.code_smells.length > 0 && (
+         <CodeSmellsList smells={data.code_smells} />
+       )}
 
           {/* AST Information */}
           {data.language && (

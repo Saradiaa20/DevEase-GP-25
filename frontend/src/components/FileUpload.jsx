@@ -64,7 +64,7 @@ function FileUpload({ onFileUpload, onContentAnalysis, loading }) {
         ) : (
           <>
             <p className="text-gray-300 mb-2">
-              Drag & drop your Python file here
+              Drag & drop your Python or Java files here
             </p>
             <p className="text-gray-500 mb-4">or</p>
             <button className="px-4 py-2 bg-[#1a2332] border border-[#2d3748] text-gray-300 rounded-lg hover:bg-[#202835] hover:border-cyan-500/50 transition-all">

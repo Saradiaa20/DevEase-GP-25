@@ -71,24 +71,51 @@ class FeatureRouter:
         # Step 2: Extract features for ML model
         ml_features = self.complexity_predictor.extract_features_from_code(code_content)
         
-        # Step 3: Route to code smell detection
-        if file_path:
-            smells = self.smell_detector.detect_smells(file_path)
-        else:
-            # Use temporary file for smell detection
-            import tempfile
-            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py', encoding='utf-8') as tmp:
-                tmp.write(code_content)
-                tmp_path = tmp.name
+        # # Step 3: Route to code smell detection
+        # if file_path:
+        #     smells = self.smell_detector.detect_smells(file_path)
+        # else:
+        #     # Use temporary file for smell detection
+        #     import tempfile
+        #     with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py', encoding='utf-8') as tmp:
+        #         tmp.write(code_content)
+        #         tmp_path = tmp.name
             
-            try:
-                smells = self.smell_detector.detect_smells(tmp_path)
-            finally:
-                if os.path.exists(tmp_path):
-                    os.unlink(tmp_path)
+        #     try:
+        #         smells = self.smell_detector.detect_smells(tmp_path)
+        #     finally:
+        #         if os.path.exists(tmp_path):
+        #             os.unlink(tmp_path)
         
-        smell_summary = self.smell_detector.get_smell_summary()
+        # smell_summary = self.smell_detector.get_smell_summary()
         
+        # Step 3: Route to code smell detection (AST-based)
+
+        language = ast_result.get("language", "Unknown")
+
+        if language == "Python":
+            smells = self.smell_detector.detect_python_smells(ast_result)
+
+        elif language == "Java":
+            smells = self.smell_detector.detect_java_smells(ast_result)
+
+        else:
+            smells = []
+        print("SMELLS DEBUG:", smells)
+        # build summary manually
+        smell_summary = {
+            "by_type": {},
+            "by_severity": {}
+        }
+
+        for s in smells:
+            smell_summary["by_type"][s.smell_type] = (
+                smell_summary["by_type"].get(s.smell_type, 0) + 1
+            )
+
+            smell_summary["by_severity"][s.severity] = (
+                smell_summary["by_severity"].get(s.severity, 0) + 1
+            )
         # Step 4: Route to quality metrics analysis
         if file_path:
             quality_score = self.quality_analyzer.analyze_file(file_path, smell_summary)
@@ -144,7 +171,16 @@ class FeatureRouter:
             'total_nodes': ast_result.get('total_nodes', 0),
             
             # Code smells
-            'code_smells': smell_summary,
+            'code_smells': [
+                {
+                    "type": s.smell_type,
+                    "severity": s.severity,
+                    "description": s.description,
+                    "line": s.line_number,
+                    "suggestion": s.suggestion
+                }
+                for s in smells
+            ],
             
             # Quality metrics
             'quality_score': {
@@ -203,7 +239,8 @@ class FeatureRouter:
                 'imports_count': len(analysis_results.get('imports', []))
             },
             'ml_features': analysis_results.get('ml_complexity', {}).get('features', {}),
-            'smell_count': analysis_results.get('code_smells', {}).get('total_smells', 0),
+            # 'smell_count': analysis_results.get('code_smells', {}).get('total_smells', 0),
+            'smell_count': len(analysis_results.get('code_smells', [])),
             'quality_score': analysis_results.get('quality_score', {}).get('overall_score', 0),
             'technical_debt_score': analysis_results.get('technical_debt', {}).get('total_debt_score', 0)
         }
