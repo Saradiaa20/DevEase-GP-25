@@ -15,7 +15,7 @@ function FileUpload({ onFileUpload, onContentAnalysis, loading }) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'text/*': ['.py', '.java', '.js', '.cpp', '.cs', '.php'],
+      'text/*': ['.py', '.java'],
     },
     maxFiles: 1,
     disabled: loading
