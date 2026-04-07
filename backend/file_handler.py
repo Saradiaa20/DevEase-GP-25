@@ -4,7 +4,7 @@ import sys
 from parsing import ASTParser
 
 class FileHandler:
-    SUPPORTED_EXTENSIONS = ['.java', '.py', '.js', '.cpp', '.cs', '.php']
+    SUPPORTED_EXTENSIONS = ['.java', '.py']
     
     def __init__(self, storage_folder="project_files"):
         self.storage_folder = storage_folder
