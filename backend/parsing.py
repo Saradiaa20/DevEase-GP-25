@@ -479,12 +479,16 @@ class ASTParser:
         classes = [cls.name for cls in tree.types if hasattr(cls, 'name')]
         methods = [method.name for cls in tree.types for method in getattr(cls, 'methods', [])]
         fields = [field.declarators[0].name for cls in tree.types for field in getattr(cls, 'fields', [])]
-
+        total_nodes = 0
+        for path, node in tree:
+            total_nodes += 1
         return {
             "language": "Java",
             "classes": classes,
+            "functions": methods,
             "methods": methods,
             "fields": fields,
+            "total_nodes": total_nodes,
             "total_classes": len(classes),
             "total_methods": len(methods)
         }   
