@@ -10,6 +10,16 @@ import {
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline'
 
+
+function formatApiError(err) {
+  const d = err.response?.data?.detail
+  if (typeof d === 'string') return d
+  if (Array.isArray(d)) {
+    return d.map((e) => (typeof e === 'string' ? e : e.msg || JSON.stringify(e))).join(', ')
+  }
+  return err.message || 'Analysis failed'
+}
+
 function Dashboard() {
   const [analysisData, setAnalysisData] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -20,6 +30,14 @@ function Dashboard() {
     setLoading(true)
     setError(null)
     setAnalysisData(null)
+    
+    if (!file || file.size === 0) {
+      setSelectedFile(null)
+      setError('This file is empty. Upload a file with code to analyze.')
+      setLoading(false)
+      return
+    }
+
     setSelectedFile(file.name)
 
     try {
@@ -38,7 +56,7 @@ function Dashboard() {
       const isNetworkError = err.message === 'Network Error' || err.code === 'ERR_NETWORK'
       const message = isNetworkError
         ? 'Backend server is not running. Start it first: from the project folder run start_backend.bat, or open a terminal, cd backend, then run: python -m app.main'
-        : (err.response?.data?.detail || err.message || 'Analysis failed')
+        : formatApiError(err)
       setError(message)
     } finally {
       setLoading(false)
@@ -64,7 +82,7 @@ function Dashboard() {
       const isNetworkError = err.message === 'Network Error' || err.code === 'ERR_NETWORK'
       const message = isNetworkError
         ? 'Backend server is not running. Start it first: from the project folder run start_backend.bat, or open a terminal, cd backend, then run: python -m app.main'
-        : (err.response?.data?.detail || err.message || 'Analysis failed')
+        : formatApiError(err)
       setError(message)
     } finally {
       setLoading(false)

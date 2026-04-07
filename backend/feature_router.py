@@ -4,6 +4,7 @@ Routes extracted features to various analysis modules and coordinates the analys
 """
 
 from typing import Dict, Any, Optional, List
+import unicodedata
 from parsing import ASTParser
 from code_smell_detector import CodeSmellDetector
 from code_quality_metrics import CodeQualityAnalyzer
@@ -11,6 +12,32 @@ from ml_complexity_predictor import ComplexityPredictor
 from technical_debt_calculator import TechnicalDebtCalculator, TechnicalDebtMetrics
 from design_pattern_detector import DesignPatternDetector
 import os
+
+
+class EmptyCodeError(ValueError):
+    """Raised when a file or pasted content has no code to analyze (empty or whitespace-only)."""
+
+    def __init__(
+        self,
+        message: str = "This file is empty or contains only whitespace. Upload a file with code to analyze.",
+    ):
+        super().__init__(message)
+
+
+def _is_effectively_empty_code(text: Optional[str]) -> bool:
+    """
+    True if there is no real code: empty, only whitespace, BOM, zero-width/invisible
+    Unicode (U+200B etc.), or other space/control/format characters.
+    """
+    if text is None:
+        return True
+    for ch in text.replace("\ufeff", ""):
+        cat = unicodedata.category(ch)
+        # Zs/Zl/Zp = separators; Cc = controls (newline, tab); Cf = format (ZWSP, etc.)
+        if cat not in ("Zs", "Zl", "Zp", "Cc", "Cf"):
+            return False
+    return True
+
 
 class FeatureRouter:
     """
@@ -48,13 +75,19 @@ class FeatureRouter:
         Returns:
             Complete analysis results dictionary
         """
-        # Step 1: Parse file and extract AST features
+        # Step 1: Load content, reject empty / whitespace-only (no meaningful code to analyze)
         if file_path:
-            ast_result = self.ast_parser.parse_file(file_path)
+            # ast_result = self.ast_parser.parse_file(file_path)
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 code_content = f.read()
-        elif code_content:
+        # elif code_content:
             # Create temporary file for parsing
+                if _is_effectively_empty_code(code_content):
+                   raise EmptyCodeError()
+            ast_result = self.ast_parser.parse_file(file_path)
+        elif code_content is not None:
+            if _is_effectively_empty_code(code_content):
+                raise EmptyCodeError()
             import tempfile
             with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py', encoding='utf-8') as tmp:
                 tmp.write(code_content)

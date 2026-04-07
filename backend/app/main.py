@@ -266,18 +266,29 @@ async def analyze_file_endpoint(
                 status_code=400,
                 detail=f"Unsupported file type: {file_ext}. Supported: {', '.join(FileHandler.SUPPORTED_EXTENSIONS)}"
             )
-        
+          # Ensure stream starts at beginning (some clients / middleware may advance it)
+        await file.seek(0)
         # Save uploaded file temporarily
         with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp_file:
             shutil.copyfileobj(file.file, tmp_file)
             tmp_path = tmp_file.name
         
+        if os.path.getsize(tmp_path) == 0:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+            raise HTTPException(
+                status_code=400,
+                detail="This file is empty. Upload a file with code to analyze.",
+            )
+
         try:
             # Use FeatureRouter for complete analysis
             result = feature_router.analyze_code(file_path=tmp_path)
             
             # Store analysis result if project_id provided
-            if project_id and current_user:
+            if project_id and authorization:
                 global analysis_counter
                 analysis_result = AnalysisResult(
                     id=analysis_counter,
@@ -302,6 +313,10 @@ async def analyze_file_endpoint(
     
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except EmptyCodeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
@@ -334,7 +349,10 @@ async def analyze_content_endpoint(
             data=result,
             message="Analysis completed successfully"
         )
-    
+    except EmptyCodeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
@@ -358,7 +376,10 @@ async def analyze_file_by_path(
             data=result,
             message="Analysis completed successfully"
         )
-    
+    except EmptyCodeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
