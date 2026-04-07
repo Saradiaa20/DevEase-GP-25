@@ -112,6 +112,7 @@ cd backend
 python -m venv venv
 source venv/bin/activate   # or venv\Scripts\activate (Windows)
 pip install -r requirements.txt
+<<<<<<< Updated upstream
 python -m app.main
 ### 3. Frontend Setup
 cd frontend
@@ -144,3 +145,6 @@ npm run dev
 - Inclusive developer experience
 
 
+=======
+p
+>>>>>>> Stashed changes
