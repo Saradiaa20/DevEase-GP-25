@@ -44,12 +44,10 @@ function AnalysisResults({ data }) {
             {data.quality_score && (
               <QualityScoreCard qualityScore={data.quality_score} />
             )}
-
-            {/* ML Complexity Prediction */}
-            {data.ml_complexity && data.ml_complexity.prediction && !data.ml_complexity.prediction.error && (
-              <MLComplexityCard mlData={data.ml_complexity} />
-            )}
           </div>
+
+          {/* ML complexity: always show when backend sent ml_complexity (includes model-missing / error states) */}
+          {data.ml_complexity && <MLComplexityCard mlData={data.ml_complexity} />}
 
           {/* Technical Debt */}
           {data.technical_debt && (
