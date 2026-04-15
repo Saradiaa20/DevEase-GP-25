@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Layout from '../components/Layout'
 import FileUpload from '../components/FileUpload'
 import AnalysisResults from '../components/AnalysisResults'
-import { analyzeFile, analyzeContent } from '../services/api'
+import { analyzeFileWithExplanation, analyzeContent, explainAnalysis } from '../services/api'
 import {
   CurrencyDollarIcon,
   CpuChipIcon,
@@ -44,7 +44,7 @@ function Dashboard() {
       const formData = new FormData()
       formData.append('file', file)
       
-      const result = await analyzeFile(formData)
+      const result = await analyzeFileWithExplanation(formData)
       setAnalysisData(result.data)
       // Save to localStorage for export functionality
       localStorage.setItem('lastAnalysis', JSON.stringify({
@@ -71,12 +71,17 @@ function Dashboard() {
 
     try {
       const result = await analyzeContent(content)
-      setAnalysisData(result.data)
+      const explainResult = await explainAnalysis(result.data)
+      const mergedData = {
+        ...result.data,
+        nlp_report: explainResult.data?.nlp_report,
+      }
+      setAnalysisData(mergedData)
       // Save to localStorage for export functionality
       localStorage.setItem('lastAnalysis', JSON.stringify({
         fileName: 'pasted_code.py',
         timestamp: new Date().toISOString(),
-        data: result.data
+        data: mergedData
       }))
     } catch (err) {
       const isNetworkError = err.message === 'Network Error' || err.code === 'ERR_NETWORK'
