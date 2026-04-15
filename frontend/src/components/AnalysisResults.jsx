@@ -44,10 +44,12 @@ function AnalysisResults({ data }) {
             {data.quality_score && (
               <QualityScoreCard qualityScore={data.quality_score} />
             )}
-          </div>
 
-          {/* ML complexity: always show when backend sent ml_complexity (includes model-missing / error states) */}
-          {data.ml_complexity && <MLComplexityCard mlData={data.ml_complexity} />}
+            {/* ML Complexity Prediction */}
+            {data.ml_complexity && data.ml_complexity.prediction && !data.ml_complexity.prediction.error && (
+              <MLComplexityCard mlData={data.ml_complexity} />
+            )}
+          </div>
 
           {/* Technical Debt */}
           {data.technical_debt && (
@@ -60,9 +62,9 @@ function AnalysisResults({ data }) {
           )}
 
           {/* Code Smells */}
-          {data.code_smells && data.code_smells.length > 0 && (
-         <CodeSmellsList smells={data.code_smells} />
-       )}
+          {data.code_smells && data.code_smells.total_smells > 0 && (
+            <CodeSmellsList smells={data.code_smells} />
+          )}
 
           {/* AST Information */}
           {data.language && (

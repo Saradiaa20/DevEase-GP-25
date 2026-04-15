@@ -1,10 +1,10 @@
-import ast
-import re
-import os
-from typing import List, Dict, Any, Tuple, Optional
-from dataclasses import dataclass
-from functools import lru_cache
-import hashlib
+# import ast
+# import re
+# import os
+# from typing import List, Dict, Any, Tuple, Optional
+# from dataclasses import dataclass
+# from functools import lru_cache
+# import hashlib
 
 # @dataclass
 # class CodeSmell:
@@ -1306,72 +1306,624 @@ import hashlib
 #         #             print(f"    Suggestion: {smell.suggestion}")
 #         #             print()
 
+# from dataclasses import dataclass
+
+# @dataclass
+# class CodeSmell:
+#     smell_type: str
+#     severity: str
+#     description: str
+#     line_number: int
+#     suggestion: str
+
+
+# class CodeSmellDetector:
+
+#     def detect_python_smells(self, ast_data):
+#         smells = []
+
+#         functions = ast_data.get("functions", [])
+#         classes = ast_data.get("classes", [])
+
+#         # Too many functions
+#         if len(functions) > 15:
+#             smells.append(CodeSmell(
+#                 "too_many_functions",
+#                 "medium",
+#                 f"{len(functions)} functions detected",
+#                 1,
+#                 "Split into smaller modules"
+#             ))
+
+#         # No classes
+#         if len(classes) == 0:
+#             smells.append(CodeSmell(
+#                 "no_classes",
+#                 "low",
+#                 "No classes found",
+#                 1,
+#                 "Use classes for better structure"
+#             ))
+
+#         return smells
+
+
+#     def detect_java_smells(self, ast_data):
+#         smells = []
+
+#         methods = ast_data.get("methods", [])
+#         fields = ast_data.get("fields", [])
+
+#         # Large class
+#         if len(methods) >= 10:
+#             smells.append(CodeSmell(
+#                 "large_class",
+#                 "medium",
+#                 f"{len(methods)} methods in class",
+#                 1,
+#                 "Split class into smaller ones"
+#             ))
+
+#         # Too many fields
+#         if len(fields) > 10:
+#             smells.append(CodeSmell(
+#                 "too_many_fields",
+#                 "low",
+#                 f"{len(fields)} fields detected",
+#                 1,
+#                 "Reduce class complexity"
+#             ))
+
+#         return smells
+
+import ast
+import re
+import os
+from typing import List, Dict, Any
 from dataclasses import dataclass
+import hashlib
+
 
 @dataclass
 class CodeSmell:
+    """Represents a detected code smell with its details"""
     smell_type: str
-    severity: str
+    severity: str  # 'low', 'medium', 'high', 'critical'
     description: str
     line_number: int
     suggestion: str
 
 
 class CodeSmellDetector:
+    """Detects various code smells in source code files"""
 
-    def detect_python_smells(self, ast_data):
-        smells = []
+    def __init__(self):
+        self.smells = []
+        self.file_path = ""
+        self.lines = []
+        self._content_cache = {}
+        self._ast_cache = {}
 
-        functions = ast_data.get("functions", [])
-        classes = ast_data.get("classes", [])
+    # ─────────────────────────────────────────────
+    # Public entry points (called by ast_parser.py)
+    # ─────────────────────────────────────────────
 
-        # Too many functions
-        if len(functions) > 15:
-            smells.append(CodeSmell(
-                "too_many_functions",
-                "medium",
-                f"{len(functions)} functions detected",
-                1,
-                "Split into smaller modules"
+    def detect_python_smells(self, ast_data: dict) -> List[CodeSmell]:
+        """Detect Python smells from ast_data (must contain '_raw_source')"""
+        self.smells = []
+        raw_source = ast_data.get("_raw_source")
+
+        if raw_source:
+            self.lines = raw_source.splitlines()
+            try:
+                content_hash = hashlib.md5(raw_source.encode()).hexdigest()
+                if content_hash in self._ast_cache:
+                    tree = self._ast_cache[content_hash]
+                else:
+                    tree = ast.parse(raw_source)
+                    self._ast_cache[content_hash] = tree
+
+                self._detect_long_functions(tree)
+                self._detect_deep_nesting(tree)
+                self._detect_duplicate_code_python(tree)
+                self._detect_magic_numbers(raw_source)
+                self._detect_unused_imports(tree)
+                self._detect_long_parameter_lists(tree)
+                self._detect_complex_conditions(tree)
+                self._detect_god_classes_python(tree)
+                self._detect_general_smells(raw_source)
+                self._detect_bare_except(tree)
+                self._detect_infinite_loops(tree)
+                self._detect_global_usage(tree)
+                self._detect_system_calls(tree)
+                self._detect_list_modification_during_iteration(tree)
+            except SyntaxError as e:
+                self.smells.append(CodeSmell(
+                    "syntax_error", "critical",
+                    f"Syntax error in Python code: {str(e)}", 0,
+                    "Fix syntax errors before analyzing code smells"
+                ))
+        else:
+            # Fallback: basic structural checks
+            functions = ast_data.get("functions", [])
+            classes = ast_data.get("classes", [])
+            if len(functions) > 15:
+                self.smells.append(CodeSmell(
+                    "too_many_functions", "medium",
+                    f"{len(functions)} functions detected", 1,
+                    "Split into smaller modules"
+                ))
+            if len(classes) == 0:
+                self.smells.append(CodeSmell(
+                    "no_classes", "low",
+                    "No classes found", 1,
+                    "Use classes for better structure"
+                ))
+
+        return self.smells
+
+    def detect_java_smells(self, ast_data: dict) -> List[CodeSmell]:
+        """Detect Java smells from ast_data (must contain '_raw_source')"""
+        self.smells = []
+        raw_source = ast_data.get("_raw_source")
+
+        if raw_source:
+            self.lines = raw_source.splitlines()
+            self._detect_long_methods_java(raw_source)
+            self._detect_deep_nesting_java(raw_source)
+            self._detect_long_parameter_lists_java(raw_source)
+            self._detect_god_classes_java(raw_source)
+            self._detect_println_in_domain_classes(raw_source)
+            self._detect_null_returns_java(raw_source)
+            self._detect_poor_encapsulation_java(raw_source)
+            self._detect_general_smells(raw_source)
+            self._detect_bare_except(raw_source)
+            self._detect_infinite_loops(raw_source)
+            self._detect_global_usage(raw_source)
+            self._detect_system_calls(raw_source)
+            self._detect_list_modification_during_iteration(raw_source)
+        else:
+            methods = ast_data.get("methods", [])
+            fields = ast_data.get("fields", [])
+            if len(methods) >= 10:
+                self.smells.append(CodeSmell(
+                    "large_class", "medium",
+                    f"{len(methods)} methods in class", 1,
+                    "Split class into smaller ones"
+                ))
+            if len(fields) > 10:
+                self.smells.append(CodeSmell(
+                    "too_many_fields", "low",
+                    f"{len(fields)} fields detected", 1,
+                    "Reduce class complexity"
+                ))
+
+        return self.smells
+
+    def get_smell_summary(self) -> Dict[str, Any]:
+        """Get a summary of detected code smells"""
+        if not self.smells:
+            return {
+                "total_smells": 0,
+                "by_severity": {"critical": 0, "high": 0, "medium": 0, "low": 0},
+                "by_type": {},
+                "smells": []
+            }
+
+        by_severity = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        by_type = {}
+
+        for smell in self.smells:
+            by_severity[smell.severity] = by_severity.get(smell.severity, 0) + 1
+            by_type[smell.smell_type] = by_type.get(smell.smell_type, 0) + 1
+
+        return {
+            "total_smells": len(self.smells),
+            "by_severity": by_severity,
+            "by_type": by_type,
+            "smells": [
+                {
+                    "type": s.smell_type,
+                    "severity": s.severity,
+                    "description": s.description,
+                    "line": s.line_number,
+                    "suggestion": s.suggestion
+                }
+                for s in self.smells
+            ]
+        }
+
+    # ─────────────────────────────────────────────
+    # Python-specific detection methods
+    # ─────────────────────────────────────────────
+
+    def _detect_long_functions(self, tree):
+        """Detect functions that are too long"""
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                start_line = node.lineno
+                end_line = node.end_lineno if hasattr(node, 'end_lineno') else start_line + 20
+                function_length = end_line - start_line + 1
+
+                if function_length > 50:
+                    severity = "high" if function_length > 100 else "medium"
+                    self.smells.append(CodeSmell(
+                        "long_function", severity,
+                        f"Function '{node.name}' is {function_length} lines long",
+                        start_line,
+                        "Consider breaking this function into smaller, more focused functions"
+                    ))
+
+    def _detect_deep_nesting(self, tree):
+        """Detect deeply nested code structures"""
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.For, ast.While, ast.If, ast.With, ast.Try)):
+                nesting_level = self._calculate_nesting_level(node)
+                if nesting_level > 4:
+                    severity = "high" if nesting_level > 6 else "medium"
+                    self.smells.append(CodeSmell(
+                        "deep_nesting", severity,
+                        f"Code block has {nesting_level} levels of nesting",
+                        node.lineno,
+                        "Consider extracting methods or using early returns to reduce nesting"
+                    ))
+
+    def _calculate_nesting_level(self, node):
+        """Calculate the nesting level of a node"""
+        level = 0
+        current = node
+        while hasattr(current, 'parent'):
+            current = current.parent
+            if isinstance(current, (ast.For, ast.While, ast.If, ast.With, ast.Try)):
+                level += 1
+        return level
+
+    def _detect_duplicate_code_python(self, tree):
+        """Detect duplicate code patterns in Python"""
+        functions = [node for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)]
+
+        for i, func1 in enumerate(functions):
+            for func2 in functions[i + 1:]:
+                if self._functions_are_similar(func1, func2):
+                    self.smells.append(CodeSmell(
+                        "duplicate_code", "medium",
+                        f"Functions '{func1.name}' and '{func2.name}' appear to be similar",
+                        func1.lineno,
+                        "Consider extracting common functionality into a shared function"
+                    ))
+
+    def _functions_are_similar(self, func1, func2):
+        func1_lines = len([n for n in ast.walk(func1) if isinstance(n, (ast.Assign, ast.Call, ast.Return))])
+        func2_lines = len([n for n in ast.walk(func2) if isinstance(n, (ast.Assign, ast.Call, ast.Return))])
+        return abs(func1_lines - func2_lines) <= 2 and func1_lines > 5
+
+    def _detect_magic_numbers(self, content: str):
+        """Detect magic numbers in code"""
+        magic_number_pattern = re.compile(r'\b(?<![\w.])([2-9]|[1-9]\d+)(?![\w.])\b')
+        lines = content.split('\n')
+
+        for line_idx, line in enumerate(lines, 1):
+            for match in magic_number_pattern.finditer(line):
+                number = match.group(1)
+                try:
+                    if int(number) > 10:
+                        self.smells.append(CodeSmell(
+                            "magic_number", "low",
+                            f"Magic number '{number}' found",
+                            line_idx,
+                            "Consider using a named constant instead of a magic number"
+                        ))
+                except ValueError:
+                    continue
+
+    def _detect_unused_imports(self, tree):
+        """Detect unused imports in Python"""
+        imports = []
+        used_names = set()
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    imports.append((alias.name, node.lineno))
+            elif isinstance(node, ast.ImportFrom):
+                for alias in node.names:
+                    imports.append((alias.name, node.lineno))
+            elif isinstance(node, ast.Name):
+                used_names.add(node.id)
+
+        for import_name, line_num in imports:
+            if import_name not in used_names and not import_name.startswith('_'):
+                self.smells.append(CodeSmell(
+                    "unused_import", "low",
+                    f"Unused import '{import_name}'",
+                    line_num,
+                    "Remove unused imports to clean up the code"
+                ))
+
+    def _detect_long_parameter_lists(self, tree):
+        """Detect functions with too many parameters"""
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                param_count = len(node.args.args)
+                if param_count > 5:
+                    severity = "high" if param_count > 8 else "medium"
+                    self.smells.append(CodeSmell(
+                        "long_parameter_list", severity,
+                        f"Function '{node.name}' has {param_count} parameters",
+                        node.lineno,
+                        "Consider using a data structure or object to group related parameters"
+                    ))
+
+    def _detect_complex_conditions(self, tree):
+        """Detect complex conditional statements"""
+        for node in ast.walk(tree):
+            if isinstance(node, ast.If):
+                condition_complexity = self._calculate_condition_complexity(node.test)
+                if condition_complexity > 3:
+                    severity = "high" if condition_complexity > 5 else "medium"
+                    self.smells.append(CodeSmell(
+                        "complex_condition", severity,
+                        f"Complex condition with {condition_complexity} operators",
+                        node.lineno,
+                        "Consider extracting the condition into a well-named boolean method"
+                    ))
+
+    def _calculate_condition_complexity(self, node):
+        if isinstance(node, (ast.And, ast.Or)):
+            return 1 + self._calculate_condition_complexity(node.values[0]) + self._calculate_condition_complexity(node.values[-1])
+        elif isinstance(node, ast.Compare):
+            return 1 + len(node.ops)
+        else:
+            return 1
+
+    def _detect_god_classes_python(self, tree):
+        """Detect classes that are too large"""
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef):
+                methods = [n for n in node.body if isinstance(n, ast.FunctionDef)]
+                if len(methods) > 15:
+                    self.smells.append(CodeSmell(
+                        "god_class", "high",
+                        f"Class '{node.name}' has {len(methods)} methods",
+                        node.lineno,
+                        "Consider splitting this class into smaller, more focused classes"
+                    ))
+
+    # ─────────────────────────────────────────────
+    # Java-specific detection methods
+    # ─────────────────────────────────────────────
+
+    def _detect_long_methods_java(self, content: str):
+        class_names = set(re.findall(r'class\s+(\w+)', content))
+        method_pattern = r'(public|private|protected)\s+(static\s+)?(\w+(?:<[^>]+>)?)\s+(\w+)\s*\([^)]*\)\s*(?:throws\s+[\w,\s]+)?\s*\{'
+
+        for match in re.finditer(method_pattern, content):
+            return_type = match.group(3)
+            method_name = match.group(4)
+            if method_name in class_names or return_type == method_name:
+                continue
+            start_line = content[:match.start()].count('\n') + 1
+            method_end_line = self._find_method_end_line(content, match.end())
+            method_length = method_end_line - start_line + 1
+
+            if method_name == 'main':
+                if method_length > 30:
+                    severity = "high" if method_length > 50 else "medium"
+                    self.smells.append(CodeSmell(
+                        "long_main_method", severity,
+                        f"main() method is {method_length} lines",
+                        start_line,
+                        "Extract logic into separate methods/classes"
+                    ))
+            elif method_length > 80:
+                severity = "high" if method_length > 150 else "medium"
+                self.smells.append(CodeSmell(
+                    "long_method", severity,
+                    f"Method '{method_name}' is {method_length} lines long",
+                    start_line,
+                    "Consider breaking this method into smaller methods"
+                ))
+
+    def _find_method_end_line(self, content: str, start_pos: int) -> int:
+        brace_count = 1
+        pos = start_pos
+        while pos < len(content) and brace_count > 0:
+            if content[pos] == '{':
+                brace_count += 1
+            elif content[pos] == '}':
+                brace_count -= 1
+            pos += 1
+        return content[:pos].count('\n') + 1
+
+    def _detect_deep_nesting_java(self, content: str):
+        lines = content.split('\n')
+        for i, line in enumerate(lines):
+            nesting_level = line.count('{') - line.count('}')
+            if nesting_level > 4:
+                self.smells.append(CodeSmell(
+                    "deep_nesting", "medium",
+                    f"Deep nesting detected (level {nesting_level})",
+                    i + 1,
+                    "Consider extracting methods or using early returns to reduce nesting"
+                ))
+
+    def _detect_long_parameter_lists_java(self, content: str):
+        method_pattern = r'(public|private|protected)?\s*(static)?\s*\w+\s+\w+\s*\(([^)]*)\)'
+        for match in re.finditer(method_pattern, content):
+            params = match.group(3).strip()
+            if params:
+                param_count = len([p.strip() for p in params.split(',') if p.strip()])
+                if param_count > 5:
+                    severity = "high" if param_count > 8 else "medium"
+                    line_num = content[:match.start()].count('\n') + 1
+                    self.smells.append(CodeSmell(
+                        "long_parameter_list", severity,
+                        f"Method has {param_count} parameters",
+                        line_num,
+                        "Consider using a data structure to group related parameters"
+                    ))
+
+    def _detect_god_classes_java(self, content: str):
+        class_pattern = r'class\s+\w+\s*\{'
+        for match in re.finditer(class_pattern, content):
+            class_start = match.end()
+            class_end = self._find_class_end(content, class_start)
+            class_content = content[class_start:class_end]
+
+            method_count = len(re.findall(
+                r'(public|private|protected)?\s*(static)?\s*\w+\s+\w+\s*\([^)]*\)\s*\{',
+                class_content
+            ))
+            field_count = len(re.findall(
+                r'(public|private|protected)?\s*(static)?\s*(final)?\s*\w+\s+\w+;',
+                class_content
             ))
 
-        # No classes
-        if len(classes) == 0:
-            smells.append(CodeSmell(
-                "no_classes",
-                "low",
-                "No classes found",
+            if method_count > 15 or field_count > 20:
+                line_num = content[:match.start()].count('\n') + 1
+                self.smells.append(CodeSmell(
+                    "god_class", "high",
+                    f"Class has {method_count} methods and {field_count} fields",
+                    line_num,
+                    "Consider splitting this class into smaller, focused classes"
+                ))
+
+    def _find_class_end(self, content, start_pos):
+        brace_count = 0
+        in_class = False
+        for i, char in enumerate(content[start_pos:], start_pos):
+            if char == '{':
+                brace_count += 1
+                in_class = True
+            elif char == '}':
+                brace_count -= 1
+                if in_class and brace_count == 0:
+                    return i
+        return len(content)
+
+    def _detect_println_in_domain_classes(self, content: str):
+        allowed_classes = ['Main', 'Console', 'Printer', 'View', 'UI', 'CLI', 'App', 'Application']
+        lines = content.split('\n')
+        current_class = None
+        brace_depth = 0
+
+        for i, line in enumerate(lines):
+            class_match = re.search(r'class\s+(\w+)', line)
+            if class_match:
+                current_class = class_match.group(1)
+            brace_depth += line.count('{') - line.count('}')
+            if current_class and 'System.out' in line:
+                if not any(allowed in current_class for allowed in allowed_classes):
+                    self.smells.append(CodeSmell(
+                        "println_in_domain", "medium",
+                        f"System.out in domain class '{current_class}' violates Single Responsibility",
+                        i + 1,
+                        "Move output logic to a presentation/view class"
+                    ))
+
+    def _detect_null_returns_java(self, content: str):
+        lines = content.split('\n')
+        for i, line in enumerate(lines):
+            if 'return null;' in line.strip():
+                for j in range(max(0, i - 10), i):
+                    method_line = lines[j].strip()
+                    if re.search(r'(public|private|protected)\s+\w+\s+\w+\s*\(', method_line):
+                        if not re.search(r'(void|int|long|double|float|boolean|byte|short|char)\s+\w+\s*\(', method_line):
+                            self.smells.append(CodeSmell(
+                                "null_return", "medium",
+                                "Method returns null - consider using Optional<T>",
+                                i + 1,
+                                "Return Optional.empty() instead of null for better null safety"
+                            ))
+                            break
+
+    def _detect_poor_encapsulation_java(self, content: str):
+        lines = content.split('\n')
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            if re.match(r'public\s+(?!static|final|class|interface|enum|void|abstract)', stripped):
+                if re.search(r'public\s+\w+\s+\w+\s*[;=]', stripped):
+                    self.smells.append(CodeSmell(
+                        "public_field", "medium",
+                        "Public field detected - breaks encapsulation",
+                        i + 1,
+                        "Make field private and provide getter/setter if needed"
+                    ))
+
+    # ─────────────────────────────────────────────
+    # General detection methods
+    # ─────────────────────────────────────────────
+
+    def _detect_general_smells(self, content: str):
+        self._detect_large_files(content)
+
+    def _detect_large_files(self, content: str):
+        line_count = len(content.split('\n'))
+        if line_count > 500:
+            severity = "high" if line_count > 1000 else "medium"
+            self.smells.append(CodeSmell(
+                "large_file", severity,
+                f"File has {line_count} lines",
                 1,
-                "Use classes for better structure"
+                "Consider splitting this file into smaller, more focused files"
             ))
+    
+    def _detect_bare_except(self, tree):
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ExceptHandler):
+                if node.type is None:
+                    self.smells.append(CodeSmell(
+                        "bare_except", "high",
+                        "Bare except detected (catches all exceptions)",
+                        node.lineno,
+                        "Catch specific exceptions instead of using bare except"
+                    ))
 
-        return smells
+    def _detect_infinite_loops(self, tree):
+        for node in ast.walk(tree):
+            if isinstance(node, ast.While):
+                if isinstance(node.test, ast.Constant) and node.test.value is True:
+                    self.smells.append(CodeSmell(
+                        "infinite_loop", "high",
+                        "Infinite loop detected (while True)",
+                        node.lineno,
+                        "Ensure loop has a proper termination condition"
+                    ))
 
+    def _detect_global_usage(self, tree):
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Global):
+                for name in node.names:
+                    self.smells.append(CodeSmell(
+                        "global_variable", "medium",
+                        f"Use of global variable '{name}'",
+                        node.lineno,
+                        "Avoid global variables; use function parameters or class attributes"
+                    ))
 
-    def detect_java_smells(self, ast_data):
-        smells = []
+    def _detect_system_calls(self, tree):
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call):
+                if isinstance(node.func, ast.Attribute):
+                    if node.func.attr == "system":
+                        self.smells.append(CodeSmell(
+                            "system_call", "high",
+                            "Use of os.system() detected",
+                            node.lineno,
+                            "Use subprocess module instead for safer execution"
+                        ))
 
-        methods = ast_data.get("methods", [])
-        fields = ast_data.get("fields", [])
+    def _detect_list_modification_during_iteration(self, tree):
+        for node in ast.walk(tree):
+            if isinstance(node, ast.For):
+                for child in ast.walk(node):
+                    if isinstance(child, ast.Call):
+                        if isinstance(child.func, ast.Attribute):
+                            if child.func.attr in ["remove", "pop", "append", "clear"]:
+                                self.smells.append(CodeSmell(
+                                    "list_modification_during_iteration", "high",
+                                    "List modified during iteration",
+                                    child.lineno,
+                                    "Avoid modifying a list while iterating over it"
+                                ))
 
-        # Large class
-        if len(methods) >= 10:
-            smells.append(CodeSmell(
-                "large_class",
-                "medium",
-                f"{len(methods)} methods in class",
-                1,
-                "Split class into smaller ones"
-            ))
-
-        # Too many fields
-        if len(fields) > 10:
-            smells.append(CodeSmell(
-                "too_many_fields",
-                "low",
-                f"{len(fields)} fields detected",
-                1,
-                "Reduce class complexity"
-            ))
-
-        return smells

@@ -22,7 +22,7 @@ sys.path.insert(0, str(backend_root))
 
 from parsing import ASTParser
 from file_handler import FileHandler
-from feature_router import FeatureRouter
+from feature_router import EmptyCodeError, FeatureRouter
 from app.models import (
     User, UserCreate, UserLogin, Project, ProjectCreate, 
     AnalysisResult, Token, UserRole
