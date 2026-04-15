@@ -106,4 +106,21 @@ export const getTechnicalDebtSummary = async (projectId = null) => {
   return response.data
 }
 
+export const analyzeFileWithExplanation = async (formData, projectId = null) => {
+  const response = await api.post('/api/analyze/file/explain', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    params: projectId ? { project_id: projectId } : {},
+  })
+  return response.data
+}
+
+export const explainAnalysis = async (analysisData) => {
+  const response = await api.post('/api/analyze/explain', {
+    analysis_data: analysisData,
+  })
+  return response.data
+}
+
 export default api

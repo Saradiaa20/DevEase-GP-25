@@ -11,6 +11,7 @@ from code_quality_metrics import CodeQualityAnalyzer
 from ml_complexity_predictor import ComplexityPredictor
 from technical_debt_calculator import TechnicalDebtCalculator, TechnicalDebtMetrics
 from design_pattern_detector import DesignPatternDetector
+from nlp_explainer import generate_nlp_report
 import os
 
 
@@ -259,7 +260,9 @@ class FeatureRouter:
                 'analysis_complete': True
             }
         }
-        
+
+        aggregated_results['nlp_report'] = generate_nlp_report(aggregated_results)
+
         return aggregated_results
     
     def get_feature_summary(self, analysis_results: Dict[str, Any]) -> Dict[str, Any]:

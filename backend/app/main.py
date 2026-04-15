@@ -22,7 +22,8 @@ sys.path.insert(0, str(backend_root))
 
 from parsing import ASTParser
 from file_handler import FileHandler
-from feature_router import EmptyCodeError, FeatureRouter
+from feature_router import FeatureRouter, EmptyCodeError
+from nlp_explainer import generate_nlp_report
 from app.models import (
     User, UserCreate, UserLogin, Project, ProjectCreate, 
     AnalysisResult, Token, UserRole
@@ -71,6 +72,10 @@ class FileAnalysisRequest(BaseModel):
     file_path: Optional[str] = None
     content: Optional[str] = None
 
+
+class ExplainRequest(BaseModel):
+    analysis_data: Dict[str, Any]
+
 @app.get("/")
 async def root():
     """Root endpoint"""
@@ -91,6 +96,8 @@ async def root():
                 "analyze_file": "/api/analyze/file",
                 "analyze_content": "/api/analyze/content",
                 "analyze_path": "/api/analyze/{file_path}",
+                "explain": "/api/analyze/explain",
+                "analyze_file_explain": "/api/analyze/file/explain",
                 "technical_debt": "/api/analysis/technical-debt"
             },
             "info": {
@@ -395,6 +402,72 @@ async def get_technical_debt_summary(
         "message": "Technical debt summary endpoint",
         "note": "Aggregate technical debt from all project analyses"
     }
+
+
+@app.post("/api/analyze/explain", response_model=AnalysisResponse)
+async def explain_analysis(request: ExplainRequest):
+    """
+    Accept a raw analysis result and return only NLP explanation output.
+    """
+    try:
+        nlp_report = generate_nlp_report(request.analysis_data)
+        return AnalysisResponse(
+            success=True,
+            data={"nlp_report": nlp_report},
+            message="NLP explanation generated successfully"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"NLP generation failed: {str(e)}")
+
+
+@app.post("/api/analyze/file/explain", response_model=AnalysisResponse)
+async def analyze_file_with_explanation(
+    file: UploadFile = File(...),
+    project_id: Optional[int] = None,
+    authorization: Optional[str] = Header(None)
+):
+    """
+    Analyze a file and return full analysis including NLP report.
+    """
+    try:
+        file_ext = os.path.splitext(file.filename)[1].lower()
+        if file_ext not in FileHandler.SUPPORTED_EXTENSIONS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported file type: {file_ext}. Supported: {', '.join(FileHandler.SUPPORTED_EXTENSIONS)}"
+            )
+
+        await file.seek(0)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp_file:
+            shutil.copyfileobj(file.file, tmp_file)
+            tmp_path = tmp_file.name
+
+        if os.path.getsize(tmp_path) == 0:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+            raise HTTPException(
+                status_code=400,
+                detail="This file is empty. Upload a file with code to analyze.",
+            )
+
+        try:
+            result = feature_router.analyze_code(file_path=tmp_path)
+            return AnalysisResponse(
+                success=True,
+                data=result,
+                message="Analysis and NLP explanation completed successfully"
+            )
+        finally:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+    except EmptyCodeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

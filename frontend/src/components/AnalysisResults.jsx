@@ -7,21 +7,26 @@ import TechnicalDebtCard from './TechnicalDebtCard'
 import AnnotatedCode from './AnnotatedCode'
 // import FunctionComplexity from './FunctionComplexity'  // Hidden - Complexity tab disabled
 import DesignPatternCard from './DesignPatternCard'
+import NLPReport from './NLPReport'
 
 function AnalysisResults({ data }) {
-  const [activeTab, setActiveTab] = useState('overview')
+  const hasNlpReport = !!data?.nlp_report
+  const [activeTab, setActiveTab] = useState(hasNlpReport ? 'report' : 'overview')
 
   // Tab display names
   const tabNames = {
+    'report': 'AI Report',
     'overview': 'Analysis Details',
     'code': 'Code'
   }
+
+  const tabs = hasNlpReport ? ['report', 'overview', 'code'] : ['overview', 'code']
 
   return (
     <div className="space-y-6">
       {/* Tab Navigation */}
       <div className="flex space-x-2 border-b border-[#2d3748]">
-        {['overview', 'code'].map((tab) => (
+        {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -35,6 +40,11 @@ function AnalysisResults({ data }) {
           </button>
         ))}
       </div>
+
+      {/* NLP Report Tab */}
+      {activeTab === 'report' && (
+        <NLPReport nlpReport={data.nlp_report} />
+      )}
 
       {/* Overview Tab */}
       {activeTab === 'overview' && (
