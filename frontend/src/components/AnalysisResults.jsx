@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import QualityScoreCard from './QualityScoreCard'
+// import QualityScoreCard from './QualityScoreCard'
 import CodeSmellsList from './CodeSmellsList'
 import MLComplexityCard from './MLComplexityCard'
 import ASTInfoCard from './ASTInfoCard'
@@ -63,9 +63,9 @@ function AnalysisResults({ data }) {
         <div className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             {/* Quality Score */}
-            {data.quality_score && (
-              <QualityScoreCard qualityScore={data.quality_score} />
-            )}
+            {/* {data.quality_score && ( */}
+              {/* <QualityScoreCard qualityScore={data.quality_score} /> */}
+            {/* )} */}
 
             {/* ML Complexity Prediction */}
             {data.ml_complexity && data.ml_complexity.prediction && !data.ml_complexity.prediction.error && (

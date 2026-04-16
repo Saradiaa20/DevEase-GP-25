@@ -7,7 +7,7 @@ import {
   CurrencyDollarIcon,
   CpuChipIcon,
   ExclamationTriangleIcon,
-  ShieldCheckIcon,
+  // ShieldCheckIcon,
 } from '@heroicons/react/24/outline'
 
 
@@ -115,7 +115,7 @@ function Dashboard() {
       complexity: mlComplexity?.prediction?.complexity_description || 'N/A',
       complexityScore: qualityScore?.complexity || 0,
       smells: totalSmells,
-      security: 0, // Would come from security analysis
+      // security: 0, // Would come from security analysis
       rating: getRating(overallQuality),  // Quality rating
     }
   }
@@ -245,13 +245,13 @@ function Dashboard() {
                   subtitle="Issues"
                   color={metrics.smells > 5 ? 'red' : 'green'}
                 />
-                <MetricCard
+                {/* <MetricCard
                   icon={ShieldCheckIcon}
                   title="Security"
                   value={metrics.security}
                   subtitle="Vulnerabilities"
                   color={metrics.security > 0 ? 'red' : 'green'}
-                />
+                /> */}
               </div>
             )}
 
