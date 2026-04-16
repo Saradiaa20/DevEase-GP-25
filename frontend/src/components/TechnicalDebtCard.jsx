@@ -1,6 +1,5 @@
 import React from 'react'
 import { CurrencyDollarIcon, ClockIcon, ArrowTrendingUpIcon, ArrowDownIcon, MinusIcon } from '@heroicons/react/24/outline'
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 
 function TechnicalDebtCard({ technicalDebt }) {
   if (!technicalDebt) {
@@ -37,27 +36,19 @@ function TechnicalDebtCard({ technicalDebt }) {
     }
   }
 
-  const getTrendIcon = (trend) => {
-    switch (trend) {
-      case 'increasing':
+  const getSeverityIcon = (severity) => {
+    switch (severity) {
+      case 'critical':
+      case 'high':
         return <ArrowTrendingUpIcon className="w-5 h-5 text-red-500" />
-      case 'decreasing':
+      case 'low':
         return <ArrowDownIcon className="w-5 h-5 text-green-500" />
       default:
         return <MinusIcon className="w-5 h-5 text-gray-500" />
     }
   }
 
-  const debtBreakdown = technicalDebt.debt_breakdown || {}
-  const pieData = Object.entries(debtBreakdown)
-    .filter(([name, value]) => typeof value === 'number' && !isNaN(value))
-    .map(([name, value]) => ({
-      name: name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-      value: Math.round(value || 0)
-    }))
-
-  const COLORS = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6']
-
+  const debtSeverity = technicalDebt.debt_severity || technicalDebt.debt_level || 'medium'
   return (
     <div className="cyber-card">
       <div className="flex items-center justify-between mb-4">
@@ -66,8 +57,8 @@ function TechnicalDebtCard({ technicalDebt }) {
           <h3 className="text-xl font-semibold text-white">Technical Debt</h3>
         </div>
         <div className="flex items-center space-x-2">
-          {getTrendIcon(technicalDebt.debt_trend)}
-          <span className="text-sm text-gray-400 capitalize">{technicalDebt.debt_trend}</span>
+          {getSeverityIcon(debtSeverity)}
+          <span className="text-sm text-gray-400 capitalize">{debtSeverity}</span>
         </div>
       </div>
 
@@ -89,32 +80,6 @@ function TechnicalDebtCard({ technicalDebt }) {
         </div>
       </div>
 
-      {/* Debt Breakdown Chart */}
-      {pieData.length > 0 && (
-        <div className="mb-6">
-          <h4 className="text-sm font-semibold text-gray-700 mb-3">Debt Breakdown</h4>
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                outerRadius={70}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
       {/* Estimated Hours */}
       {technicalDebt.estimated_hours != null && (
         <div className="mb-6 p-3 bg-blue-500/20 rounded-lg border border-blue-500/50">
@@ -124,40 +89,6 @@ function TechnicalDebtCard({ technicalDebt }) {
               <p className="text-sm font-semibold text-blue-300">Estimated Fix Time</p>
               <p className="text-lg font-bold text-blue-400">{(technicalDebt.estimated_hours || 0).toFixed(1)} hours</p>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Debt Breakdown Details */}
-      {Object.keys(debtBreakdown).length > 0 && (
-        <div className="mb-6">
-          <h4 className="text-sm font-semibold text-gray-300 mb-3">Category Breakdown</h4>
-          <div className="space-y-2">
-            {Object.entries(debtBreakdown)
-              .filter(([_, score]) => typeof score === 'number' && !isNaN(score))
-              .map(([category, score]) => (
-                <div key={category} className="flex items-center justify-between">
-                  <span className="text-xs text-gray-400 capitalize">
-                    {category.replace(/_/g, ' ')}
-                  </span>
-                  <div className="flex items-center space-x-2 flex-1 mx-2">
-                    <div className="flex-1 h-2 bg-[#2d3748] rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{
-                          width: `${score || 0}%`,
-                          backgroundColor: getDebtLevelColor(
-                            score >= 70 ? 'critical' : score >= 50 ? 'high' : score >= 30 ? 'medium' : 'low'
-                          )
-                        }}
-                      />
-                    </div>
-                    <span className="text-xs font-semibold text-gray-300 w-12 text-right">
-                      {(score || 0).toFixed(1)}
-                    </span>
-                  </div>
-                </div>
-              ))}
           </div>
         </div>
       )}

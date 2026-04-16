@@ -44,7 +44,7 @@ class FeatureRouter:
     """
     Orchestrates the analysis pipeline by routing features to appropriate modules
     """
-    
+
     def __init__(self):
         self.ast_parser = ASTParser()
         self.smell_detector = CodeSmellDetector()
@@ -54,7 +54,7 @@ class FeatureRouter:
         self.design_pattern_detector = DesignPatternDetector()
         # Try to load pre-trained design pattern model
         self.design_pattern_detector.load_model()
-    
+
     def analyze_code(
         self,
         file_path: Optional[str] = None,
@@ -68,23 +68,22 @@ class FeatureRouter:
         4. Route to ML complexity prediction
         5. Route to technical debt calculation
         6. Aggregate results
-        
+
         Args:
             file_path: Path to code file
             code_content: Code content as string (if file_path not provided)
-        
+
         Returns:
             Complete analysis results dictionary
         """
         # Step 1: Load content, reject empty / whitespace-only (no meaningful code to analyze)
+        # FIX: corrected indentation — empty check and ast_result were wrongly nested
+        # inside the 'with open' block in the original code.
         if file_path:
-            # ast_result = self.ast_parser.parse_file(file_path)
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 code_content = f.read()
-        # elif code_content:
-            # Create temporary file for parsing
-                if _is_effectively_empty_code(code_content):
-                   raise EmptyCodeError()
+            if _is_effectively_empty_code(code_content):
+                raise EmptyCodeError()
             ast_result = self.ast_parser.parse_file(file_path)
         elif code_content is not None:
             if _is_effectively_empty_code(code_content):
@@ -93,7 +92,7 @@ class FeatureRouter:
             with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py', encoding='utf-8') as tmp:
                 tmp.write(code_content)
                 tmp_path = tmp.name
-            
+
             try:
                 ast_result = self.ast_parser.parse_file(tmp_path)
             finally:
@@ -101,74 +100,66 @@ class FeatureRouter:
                     os.unlink(tmp_path)
         else:
             raise ValueError("Either file_path or code_content must be provided")
-        
+
         # Step 2: Extract features for ML model
         ml_features = self.complexity_predictor.extract_features_from_code(code_content)
-        
-        # # Step 3: Route to code smell detection
-        # if file_path:
-        #     smells = self.smell_detector.detect_smells(file_path)
-        # else:
-        #     # Use temporary file for smell detection
-        #     import tempfile
-        #     with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py', encoding='utf-8') as tmp:
-        #         tmp.write(code_content)
-        #         tmp_path = tmp.name
-            
-        #     try:
-        #         smells = self.smell_detector.detect_smells(tmp_path)
-        #     finally:
-        #         if os.path.exists(tmp_path):
-        #             os.unlink(tmp_path)
-        
-        # smell_summary = self.smell_detector.get_smell_summary()
-        
-        # Step 3: Route to code smell detection (AST-based)
 
+        # Step 3: Route to code smell detection (AST-based)
         language = ast_result.get("language", "Unknown")
 
         if language == "Python":
             smells = self.smell_detector.detect_python_smells(ast_result)
-
         elif language == "Java":
             smells = self.smell_detector.detect_java_smells(ast_result)
-
         else:
             smells = []
-        print("SMELLS DEBUG:", smells)
-        # build summary manually
+
+        # FIX Bug 1 & Bug 2: smell_summary now includes 'total_smells' and 'smells' list.
+        # Without 'total_smells', _calculate_smell_debt() always returned 0.0.
+        # Without 'smells', _estimate_fix_hours() and _get_priority_issues() always
+        # received an empty list, making those calculations completely wrong.
         smell_summary = {
             "by_type": {},
-            "by_severity": {}
+            "by_severity": {},
+            "total_smells": len(smells),          # FIX Bug 1
+            "smells": [                            # FIX Bug 2
+                {
+                    "type": s.smell_type,
+                    "severity": s.severity,
+                    "description": s.description,
+                    "line": s.line_number,
+                    "suggestion": s.suggestion
+                }
+                for s in smells
+            ]
         }
 
         for s in smells:
             smell_summary["by_type"][s.smell_type] = (
                 smell_summary["by_type"].get(s.smell_type, 0) + 1
             )
-
             smell_summary["by_severity"][s.severity] = (
                 smell_summary["by_severity"].get(s.severity, 0) + 1
             )
+
         # Step 4: Route to quality metrics analysis
         if file_path:
             quality_score = self.quality_analyzer.analyze_file(file_path, smell_summary)
         else:
-            # Use temporary file for quality analysis
             import tempfile
             with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py', encoding='utf-8') as tmp:
                 tmp.write(code_content)
                 tmp_path = tmp.name
-            
+
             try:
                 quality_score = self.quality_analyzer.analyze_file(tmp_path, smell_summary)
             finally:
                 if os.path.exists(tmp_path):
                     os.unlink(tmp_path)
-        
+
         # Step 5: Route to ML complexity prediction
         ml_prediction = self.complexity_predictor.predict_complexity(ml_features)
-        
+
         # Step 6: Route to technical debt calculation
         debt_metrics = self.debt_calculator.calculate_debt(
             quality_score={
@@ -187,23 +178,23 @@ class FeatureRouter:
             },
             ast_data=ast_result
         )
-        
-        # Step 7: Route to design pattern detection (for Java code)
+
+        # Step 7: Route to design pattern detection
         language = ast_result.get('language', 'Unknown')
         design_patterns = self.design_pattern_detector.get_pattern_summary(code_content, language)
-        
+
         # Step 8: Aggregate all results
         aggregated_results = {
             # Include actual code content for frontend display
             'code_content': code_content,
-            
+
             # AST and parsing results
             'language': ast_result.get('language', 'Unknown'),
             'classes': ast_result.get('classes', []),
             'functions': ast_result.get('functions', []),
             'imports': ast_result.get('imports', []),
             'total_nodes': ast_result.get('total_nodes', 0),
-            
+
             # Code smells
             'code_smells': [
                 {
@@ -215,7 +206,7 @@ class FeatureRouter:
                 }
                 for s in smells
             ],
-            
+
             # Quality metrics
             'quality_score': {
                 'overall_score': quality_score.overall_score,
@@ -226,13 +217,13 @@ class FeatureRouter:
                 'issues': quality_score.issues,
                 'recommendations': quality_score.recommendations
             },
-            
+
             # ML complexity prediction
             'ml_complexity': {
                 'features': ml_features,
                 'prediction': ml_prediction
             },
-            
+
             # Technical debt
             'technical_debt': {
                 'total_debt_score': debt_metrics.total_debt_score,
@@ -240,13 +231,13 @@ class FeatureRouter:
                 'debt_breakdown': debt_metrics.debt_breakdown,
                 'estimated_hours': debt_metrics.estimated_hours,
                 'priority_issues': debt_metrics.priority_issues,
-                'debt_trend': debt_metrics.debt_trend,
+                'debt_severity': debt_metrics.debt_severity,
                 'recommendations': debt_metrics.recommendations
             },
-            
+
             # Design patterns (ML-based detection)
             'design_patterns': design_patterns.get('design_patterns', {}),
-            
+
             # Analysis metadata
             'analysis_metadata': {
                 'modules_used': [
@@ -264,7 +255,7 @@ class FeatureRouter:
         aggregated_results['nlp_report'] = generate_nlp_report(aggregated_results)
 
         return aggregated_results
-    
+
     def get_feature_summary(self, analysis_results: Dict[str, Any]) -> Dict[str, Any]:
         """Get a summary of extracted features"""
         return {
@@ -275,7 +266,6 @@ class FeatureRouter:
                 'imports_count': len(analysis_results.get('imports', []))
             },
             'ml_features': analysis_results.get('ml_complexity', {}).get('features', {}),
-            # 'smell_count': analysis_results.get('code_smells', {}).get('total_smells', 0),
             'smell_count': len(analysis_results.get('code_smells', [])),
             'quality_score': analysis_results.get('quality_score', {}).get('overall_score', 0),
             'technical_debt_score': analysis_results.get('technical_debt', {}).get('total_debt_score', 0)
