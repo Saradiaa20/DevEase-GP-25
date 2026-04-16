@@ -68,6 +68,10 @@ class DesignPatternDetector:
         row = {c: features.get(c, 0) for c in cols}
         return pd.DataFrame([row], columns=cols)
 
+    @staticmethod
+    def _is_none_label(label: str) -> bool:
+        return str(label).strip().lower() == "none"
+
     def _predict_ml(self, code_content: str, language: str) -> Dict[str, Any]:
 
         no_pattern_response = {
@@ -112,6 +116,7 @@ class DesignPatternDetector:
 
         pred_idx = self._pipe.predict(X)[0]
         pattern_name = str(self._label_encoder.inverse_transform([pred_idx])[0])
+        selected_confidence = 1.0
 
         #  Prototype fix
         if pattern_name == "Prototype" and "clone(" not in code_content:
@@ -124,13 +129,41 @@ class DesignPatternDetector:
         if proba is not None:
             order = np.argsort(proba)[::-1]
             top = [(str(classes[i]), float(proba[i])) for i in order[:5]]
+            selected_confidence = float(proba[pred_idx])
         else:
             top = [(pattern_name, 1.0)]
 
+        # # If the model predicts the explicit "none" class, fallback to the strongest
+        # # real pattern class to keep behavior similar to the earlier always-classified UX.
+        # if self._is_none_label(pattern_name):
+        #     if proba is None:
+        #         return {**no_pattern_response, "features": feats}
+
+        #     non_none_idx = [i for i, cls in enumerate(classes) if not self._is_none_label(cls)]
+        #     if not non_none_idx:
+        #         return {**no_pattern_response, "features": feats}
+
+        #     best_idx = max(non_none_idx, key=lambda i: float(proba[i]))
+        #     pattern_name = str(classes[best_idx])
+        #     selected_confidence = float(proba[best_idx])
+
+        if self._is_none_label(pattern_name):
+            if proba is None or max(proba) < 0.4:
+                return {**no_pattern_response, "features": feats}
+
+            non_none_idx = [i for i, cls in enumerate(classes) if not self._is_none_label(cls)]
+            if not non_none_idx:
+                return {**no_pattern_response, "features": feats}
+
+            best_idx = max(non_none_idx, key=lambda i: float(proba[i]))
+            pattern_name = str(classes[best_idx])
+            selected_confidence = float(proba[best_idx])
         category_scores = {"Creational": 0, "Structural": 0, "Behavioral": 0}
 
         if proba is not None:
             for i, cls in enumerate(classes):
+                if self._is_none_label(cls):
+                    continue
                 cat = PATTERN_CATEGORY.get(cls, "Behavioral")
                 category_scores[cat] += float(proba[i])
 
@@ -138,13 +171,13 @@ class DesignPatternDetector:
 
         return {
             "predicted_category": predicted_category,
-            "confidence": round(top[0][1], 3),
+            "confidence": round(selected_confidence, 3),
             "category_scores": category_scores,
             "detected_patterns": [],
             "suggested_pattern": {
                 "name": pattern_name,
                 "category": predicted_category,
-                "confidence": round(top[0][1], 3),
+                "confidence": round(selected_confidence, 3),
                 "description": PATTERN_DESCRIPTIONS.get(pattern_name, ""),
             },
             "features": feats,
