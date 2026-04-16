@@ -141,20 +141,20 @@ function CodeSmellsList({ smells }) {
   }, {})
 
   return (
-    <div className="cyber-card">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-semibold text-white flex items-center">
-          <ExclamationTriangleIcon className="w-6 h-6 text-yellow-400 mr-2" />
-          Code Smells Detected
+    <div className="rounded-lg border border-[#2d3748] bg-[#0f1623] px-5 py-4">
+      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+        <h3 className="text-sm font-semibold text-cyan-400 flex items-center">
+          <ExclamationTriangleIcon className="w-5 h-5 text-cyan-400 mr-2 shrink-0" />
+          Code smells detected
         </h3>
-        <span className="bg-red-500/20 text-red-400 border border-red-500/50 px-3 py-1 rounded-full text-sm font-semibold">
-          {smells.length} Total
+        <span className="text-xs px-3 py-1 rounded-full border border-cyan-800/50 bg-cyan-900/20 text-cyan-300">
+          {smells.length} total
         </span>
       </div>
 
       <div className="space-y-3">
         {Object.entries(grouped).map(([severity, items]) => (
-          <div key={severity} className="border rounded-lg overflow-hidden">
+          <div key={severity} className="border border-[#2d3748] rounded-lg overflow-hidden bg-[#1a2332]">
             <button
               onClick={() => toggleSeverity(severity)}
               className={`w-full px-4 py-3 flex items-center justify-between ${severityColors[severity]}`}

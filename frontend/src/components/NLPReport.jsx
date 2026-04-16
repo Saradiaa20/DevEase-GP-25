@@ -80,47 +80,6 @@ function MarkdownText({ text }) {
   return <div className="space-y-1">{elements}</div>
 }
 
-function SectionBadge({ label, color = 'cyan' }) {
-  const colors = {
-    cyan: 'bg-cyan-900/40 text-cyan-300 border border-cyan-800',
-    amber: 'bg-amber-900/40 text-amber-300 border border-amber-800',
-    red: 'bg-red-900/40 text-red-300 border border-red-800',
-    green: 'bg-green-900/40 text-green-300 border border-green-800',
-    purple: 'bg-purple-900/40 text-purple-300 border border-purple-800',
-    blue: 'bg-blue-900/40 text-blue-300 border border-blue-800',
-  }
-  return (
-    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${colors[color] || colors.cyan}`}>
-      {label}
-    </span>
-  )
-}
-
-function ReportSection({ title, badge, badgeColor, content, defaultOpen = false, icon }) {
-  const [open, setOpen] = useState(defaultOpen)
-
-  return (
-    <div className="border border-[#2d3748] rounded-lg overflow-hidden">
-      <button
-        onClick={() => setOpen((value) => !value)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-[#1a2332] hover:bg-[#1e293b] transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          {icon && <span className="text-base">{icon}</span>}
-          <span className="text-sm font-semibold text-gray-200">{title}</span>
-          {badge && <SectionBadge label={badge} color={badgeColor} />}
-        </div>
-        <span className="text-gray-500 text-xs">{open ? '▲' : '▼'}</span>
-      </button>
-      {open && (
-        <div className="px-4 py-3 bg-[#0f1623] border-t border-[#2d3748]">
-          <MarkdownText text={content} />
-        </div>
-      )}
-    </div>
-  )
-}
-
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false)
   const handleCopy = () => {
@@ -139,7 +98,7 @@ function CopyButton({ text }) {
   )
 }
 
-function DownloadPdfButton({ text, generatedAt }) {
+function DownloadPdfButton({ text }) {
   const [downloading, setDownloading] = useState(false)
 
   const toPlainText = (input) => (
@@ -161,22 +120,15 @@ function DownloadPdfButton({ text, generatedAt }) {
       const maxWidth = pageWidth - margin * 2
       let y = margin
 
-      const title = 'DevEase AI NLP Report'
-      const generatedLabel = generatedAt
-        ? `Generated: ${new Date(generatedAt).toLocaleString()}`
-        : `Generated: ${new Date().toLocaleString()}`
+      const title = 'DevEase Explanation Report'
 
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(16)
       doc.text(title, margin, y)
-      y += 24
-
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(10)
-      doc.text(generatedLabel, margin, y)
-      y += 22
+      y += 28
 
       const plainText = toPlainText(text)
+      doc.setFont('helvetica', 'normal')
       doc.setFontSize(11)
       const lines = doc.splitTextToSize(plainText, maxWidth)
 
@@ -207,8 +159,6 @@ function DownloadPdfButton({ text, generatedAt }) {
 }
 
 export default function NLPReport({ nlpReport }) {
-  const [view, setView] = useState('sections')
-
   if (!nlpReport) {
     return (
       <div className="text-gray-500 text-sm italic p-4 text-center">
@@ -219,59 +169,21 @@ export default function NLPReport({ nlpReport }) {
 
   const {
     summary,
-    overview,
-    quality,
-    code_smells: codeSmells,
-    technical_debt: technicalDebt,
-    complexity,
-    design_patterns: designPatterns,
     full_report: fullReport,
-    generated_at: generatedAt,
   } = nlpReport
-
-  const sections = [
-    { key: 'overview', title: 'Code Overview', icon: '🔍', content: overview, defaultOpen: true },
-    { key: 'quality', title: 'Quality Metrics', icon: '📊', content: quality, defaultOpen: true },
-    { key: 'smells', title: 'Code Smells', icon: '🧪', content: codeSmells, badgeColor: 'amber' },
-    { key: 'debt', title: 'Technical Debt', icon: '💳', content: technicalDebt, badgeColor: 'red' },
-    {
-      key: 'complexity',
-      title: 'Complexity Analysis',
-      icon: '🤖',
-      content: complexity,
-      badge: 'ML-powered',
-      badgeColor: 'purple',
-    },
-    { key: 'patterns', title: 'Design Patterns', icon: '🏗️', content: designPatterns, badgeColor: 'blue' },
-  ]
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-bold text-white">AI Analysis Report</h2>
+          <h2 className="text-base font-bold text-white">Explanation Report</h2>
           <p className="text-xs text-gray-500 mt-0.5">
-            Plain-English explanation of all analysis results
-            {generatedAt && ` · Generated ${new Date(generatedAt).toLocaleTimeString()}`}
+            English explanation of all analysis results (NLP)
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex rounded overflow-hidden border border-[#2d3748] text-xs">
-            <button
-              onClick={() => setView('sections')}
-              className={`px-3 py-1 transition-colors ${view === 'sections' ? 'bg-cyan-900/50 text-cyan-300' : 'bg-[#1a2332] text-gray-400 hover:text-gray-200'}`}
-            >
-              Sections
-            </button>
-            <button
-              onClick={() => setView('full')}
-              className={`px-3 py-1 transition-colors ${view === 'full' ? 'bg-cyan-900/50 text-cyan-300' : 'bg-[#1a2332] text-gray-400 hover:text-gray-200'}`}
-            >
-              Full report
-            </button>
-          </div>
           {fullReport && <CopyButton text={fullReport} />}
-          {fullReport && <DownloadPdfButton text={fullReport} generatedAt={generatedAt} />}
+          {fullReport && <DownloadPdfButton text={fullReport} />}
         </div>
       </div>
 
@@ -286,25 +198,15 @@ export default function NLPReport({ nlpReport }) {
         </div>
       )}
 
-      {view === 'sections' && (
-        <div className="space-y-2">
-          {sections.map((section) => (
-            <ReportSection
-              key={section.key}
-              title={section.title}
-              icon={section.icon}
-              badge={section.badge}
-              badgeColor={section.badgeColor}
-              content={section.content}
-              defaultOpen={section.defaultOpen}
-            />
-          ))}
+      {fullReport && (
+        <div className="rounded-lg border border-[#2d3748] bg-[#0f1623] px-5 py-4">
+          <MarkdownText text={fullReport} />
         </div>
       )}
 
-      {view === 'full' && fullReport && (
-        <div className="rounded-lg border border-[#2d3748] bg-[#0f1623] px-5 py-4">
-          <MarkdownText text={fullReport} />
+      {!fullReport && (
+        <div className="rounded-lg border border-[#2d3748] bg-[#0f1623]/50 px-4 py-3 text-sm text-gray-500">
+          Full report text is not available for this analysis.
         </div>
       )}
     </div>

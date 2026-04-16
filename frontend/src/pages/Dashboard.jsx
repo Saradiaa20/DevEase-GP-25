@@ -107,12 +107,20 @@ function Dashboard() {
     const totalSmells = codeSmells?.length || 0
     const overallQuality = qualityScore?.overall_score || 0
     
+    const mlBigO = mlComplexity?.prediction?.complexity_description
+    const cyclomaticValue =
+      mlBigO ||
+      (qualityScore?.complexity != null ? Number(qualityScore.complexity).toFixed(1) : 'N/A')
+    const cyclomaticSubtitle = mlBigO ? 'Predicted complexity' : 'Complexity score'
+
     return {
       technicalDebt: debtScore,
       technicalDebtHours: estimatedHours,
       debtRating: getDebtRating(debtScore, estimatedHours, totalSmells, overallQuality),
       complexity: mlComplexity?.prediction?.complexity_description || 'N/A',
       complexityScore: qualityScore?.complexity || 0,
+      cyclomaticValue,
+      cyclomaticSubtitle,
       smells: totalSmells,
       rating: getRating(overallQuality),  // Quality rating
     }
@@ -227,13 +235,12 @@ function Dashboard() {
                   value={metrics.debtRating.letter}
                   subtitle={`${metrics.technicalDebtHours.toFixed(1)}h estimated`}
                   color={metrics.debtRating.color}
-                  score={metrics.technicalDebt}
                 />
                 <MetricCard
                   icon={CpuChipIcon}
                   title="Cyclomatic"
-                  value={metrics.complexityScore}
-                  subtitle="Complexity Score"
+                  value={metrics.cyclomaticValue}
+                  subtitle={metrics.cyclomaticSubtitle}
                   color="blue"
                 />
                 <MetricCard
@@ -287,14 +294,16 @@ function MetricCard({ icon: Icon, title, value, subtitle, color, score }) {
 
   return (
     <div className={`cyber-card border ${colorClasses[color]}`}>
-      <div className="flex items-center justify-between mb-2">
-        <Icon className={`w-6 h-6 ${colorClasses[color].split(' ')[0]}`} />
-        <span className="text-xs text-gray-400">{title}</span>
+      <div className="flex justify-between items-start gap-3">
+        <span className="text-xs text-gray-400 shrink-0">{title}</span>
+        <div className="flex flex-col items-end text-right min-w-0">
+          <Icon className={`w-6 h-6 shrink-0 ${colorClasses[color].split(' ')[0]}`} />
+          <div className={`text-3xl font-bold mt-1 mb-1 ${colorClasses[color].split(' ')[0]}`}>
+            {value}
+          </div>
+          <div className="text-xs text-gray-400">{subtitle}</div>
+        </div>
       </div>
-      <div className={`text-3xl font-bold mb-1 ${colorClasses[color].split(' ')[0]}`}>
-        {value}
-      </div>
-      <div className="text-xs text-gray-400">{subtitle}</div>
       {score !== undefined && (
         <div className="mt-2 h-1 bg-[#2d3748] rounded-full overflow-hidden">
           <div

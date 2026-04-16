@@ -3,7 +3,7 @@ import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 
 function AnnotatedCode({ data }) {
   const [isCollapsed, setIsCollapsed] = useState(false)
-  
+
   const codeContent = data.code_content || '// No code content available'
   const language = data.language || 'Python'
 
@@ -21,7 +21,7 @@ function AnnotatedCode({ data }) {
     ]
 
     const trimmed = line.trim()
-    
+
     // Comments
     if (trimmed.startsWith('#') || trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*')) {
       return <span className="text-green-500">{line}</span>
@@ -66,24 +66,32 @@ function AnnotatedCode({ data }) {
         </span>
       )
     }
-    
+
     return <span className="text-gray-300">{line}</span>
   }
 
   return (
-    <div className="cyber-card">
-      <div 
-        className="flex items-center justify-between mb-4 cursor-pointer"
+    <div className="space-y-4">
+      <div
+        className="flex items-start justify-between gap-4 flex-wrap cursor-pointer select-none"
         onClick={() => setIsCollapsed(!isCollapsed)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            setIsCollapsed(!isCollapsed)
+          }
+        }}
       >
-        <h2 className="text-xl font-semibold text-white flex items-center">
-          <svg className="w-5 h-5 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Source Code
-        </h2>
-        <div className="flex items-center space-x-2">
-          <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium">
+        <div>
+          <h2 className="text-base font-bold text-white">Source code</h2>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Syntax-highlighted view with line numbers
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs px-3 py-1 rounded-full border border-cyan-800/50 bg-cyan-900/20 text-cyan-300">
             {language}
           </span>
           {isCollapsed ? (
@@ -95,27 +103,25 @@ function AnnotatedCode({ data }) {
       </div>
 
       {!isCollapsed && (
-        <div className="bg-[#0d1117] rounded-lg border border-[#30363d] overflow-hidden">
-          <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+        <div className="rounded-lg border border-[#2d3748] bg-[#0f1623] overflow-hidden">
+          <div className="overflow-x-auto max-h-[500px] overflow-y-auto bg-[#1a2332]">
             <table className="w-full border-collapse">
               <tbody>
                 {lines.map((line, idx) => {
                   const lineNumber = idx + 1
-                  
+
                   return (
-                    <tr 
-                      key={idx} 
-                      className="hover:bg-[#161b22]"
+                    <tr
+                      key={idx}
+                      className="hover:bg-[#0f1623]/40"
                     >
-                      {/* Line Number */}
-                      <td 
-                        className="px-3 py-0 text-right select-none font-mono text-xs border-r border-[#30363d] text-gray-600" 
+                      <td
+                        className="px-3 py-0 text-right select-none font-mono text-xs border-r border-[#2d3748] text-gray-500"
                         style={{ width: '50px', minWidth: '50px' }}
                       >
                         {lineNumber}
                       </td>
-                      
-                      {/* Code Content */}
+
                       <td className="px-4 py-0 font-mono text-sm whitespace-pre">
                         <div className="flex items-center min-h-[24px]">
                           <code>{highlightSyntax(line || ' ')}</code>
@@ -127,13 +133,10 @@ function AnnotatedCode({ data }) {
               </tbody>
             </table>
           </div>
-          
-          {/* Summary Footer */}
-          <div className="border-t border-[#30363d] bg-[#161b22] px-4 py-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-400">
-                {lines.length} lines
-              </span>
+
+          <div className="border-t border-[#2d3748] bg-[#0f1623] px-4 py-2">
+            <div className="flex items-center justify-between text-xs text-gray-500">
+              <span>{lines.length} lines</span>
             </div>
           </div>
         </div>

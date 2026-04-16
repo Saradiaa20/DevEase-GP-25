@@ -90,7 +90,7 @@ function SuggestionCard({ s, onAccept, onDismiss, accepted }) {
               <p className="text-xs text-red-400 font-semibold mb-1 flex items-center gap-1">
                 <XMarkIcon className="w-3 h-3" /> Original (unsafe)
               </p>
-              <pre className="bg-[#0a0e27] rounded-lg p-3 text-xs text-red-300 overflow-x-auto whitespace-pre-wrap break-words border border-red-900/50 max-h-64">
+              <pre className="bg-[var(--bg-primary)] rounded-lg p-3 text-xs text-red-300 overflow-x-auto whitespace-pre-wrap break-words border border-red-900/50 max-h-64">
                 {s.original_code}
               </pre>
             </div>
@@ -98,7 +98,7 @@ function SuggestionCard({ s, onAccept, onDismiss, accepted }) {
               <p className="text-xs text-green-400 font-semibold mb-1 flex items-center gap-1">
                 <CheckCircleIcon className="w-3 h-3" /> Suggested (safer)
               </p>
-              <pre className="bg-[#0a0e27] rounded-lg p-3 text-xs text-green-300 overflow-x-auto whitespace-pre-wrap break-words border border-green-900/50 max-h-64">
+              <pre className="bg-[var(--bg-primary)] rounded-lg p-3 text-xs text-green-300 overflow-x-auto whitespace-pre-wrap break-words border border-green-900/50 max-h-64">
                 {s.wrapped_code}
               </pre>
             </div>

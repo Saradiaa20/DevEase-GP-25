@@ -1,7 +1,5 @@
 import React, { useState } from 'react'
-// import QualityScoreCard from './QualityScoreCard'
 import CodeSmellsList from './CodeSmellsList'
-import MLComplexityCard from './MLComplexityCard'
 import ASTInfoCard from './ASTInfoCard'
 import TechnicalDebtCard from './TechnicalDebtCard'
 import AnnotatedCode from './AnnotatedCode'
@@ -21,21 +19,27 @@ function AnalysisResults({ data }) {
   const hasWrapperTab =
     wrapperData &&
     (wrapperData.patterns_found > 0 || wrapperData.suggestions?.length > 0 || wrapperData.message)
-  const [activeTab, setActiveTab] = useState(hasNlpReport ? 'report' : 'overview')
+  const [activeTab, setActiveTab] = useState('overview')
 
-  // Tab display names
+  // Tab display names (order below: Analysis Details → Explanation Report → Safety Wrappers → Source Code)
   const tabNames = {
-    'report': 'AI Report',
-    'overview': 'Analysis Details',
-    'code': 'Code',
-    'wrappers': 'Safety Wrappers',
+    report: 'Explanation Report',
+    overview: 'Analysis Details',
+    code: 'Source Code',
+    wrappers: 'Safety Wrappers',
   }
 
-  const tabs = hasNlpReport ? ['report', 'overview', 'code'] : ['overview', 'code']
-  if (hasWrapperTab) tabs.splice(hasNlpReport ? 2 : 1, 0, 'wrappers')
+  const tabs = ['overview']
+  if (hasNlpReport) tabs.push('report')
+  if (hasWrapperTab) tabs.push('wrappers')
+  tabs.push('code')
+
+  // Backend returns code_smells as an array; some paths use { total_smells, smells }.
+  const rawSmells = data?.code_smells
+  const smellListForUi = Array.isArray(rawSmells) ? rawSmells : rawSmells?.smells ?? []
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Tab Navigation */}
       <div className="flex space-x-2 border-b border-[#2d3748]">
         {tabs.map((tab) => (
@@ -53,44 +57,37 @@ function AnalysisResults({ data }) {
         ))}
       </div>
 
-      {/* NLP Report Tab */}
+      {/* Explanation Report tab */}
       {activeTab === 'report' && (
         <NLPReport nlpReport={data.nlp_report} />
       )}
 
-      {/* Overview Tab */}
+      {/* Overview Tab — same shell as Explanation Report / Safety Wrappers */}
       {activeTab === 'overview' && (
-        <div className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Quality Score */}
-            {/* {data.quality_score && ( */}
-              {/* <QualityScoreCard qualityScore={data.quality_score} /> */}
-            {/* )} */}
-
-            {/* ML Complexity Prediction */}
-            {data.ml_complexity && data.ml_complexity.prediction && !data.ml_complexity.prediction.error && (
-              <MLComplexityCard mlData={data.ml_complexity} />
-            )}
+        <div className="space-y-4">
+          <div>
+            {/* <h2 className="text-base font-bold text-white">Analysis Details</h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              AST structure, code smells, design patterns, and technical debt
+            </p> */}
           </div>
 
-          {/* Technical Debt */}
-          {data.technical_debt && (
-            <TechnicalDebtCard technicalDebt={data.technical_debt} />
+          {/* AST analysis */}
+          {data.language && (
+            <ASTInfoCard astData={data} />
           )}
 
-          {/* Design Patterns */}
+          {/* Code smells */}
+          {smellListForUi.length > 0 && <CodeSmellsList smells={smellListForUi} />}
+
+          {/* Design patterns */}
           {data.design_patterns && (
             <DesignPatternCard data={data} />
           )}
 
-          {/* Code Smells */}
-          {data.code_smells && data.code_smells.total_smells > 0 && (
-            <CodeSmellsList smells={data.code_smells} />
-          )}
-
-          {/* AST Information */}
-          {data.language && (
-            <ASTInfoCard astData={data} />
+          {/* Technical debt */}
+          {data.technical_debt && (
+            <TechnicalDebtCard technicalDebt={data.technical_debt} />
           )}
         </div>
       )}
@@ -120,67 +117,88 @@ function WrapperResults({ wrapperData }) {
 
   if (patternsFound === 0 && suggestions.length === 0) {
     return (
-      <div className="cyber-card border-green-500/40 bg-green-500/10">
-        <div className="flex items-center gap-2 text-green-400 font-semibold mb-2">
-          <CheckCircleIcon className="w-5 h-5" />
-          No unsafe wrapper patterns found
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-base font-bold text-white">Safety Wrappers</h2>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Unsafe patterns and suggested safer replacements
+          </p>
         </div>
-        <p className="text-sm text-gray-300">{wrapperData?.message || 'Your code looks safe.'}</p>
+        <div className="rounded-lg border border-cyan-800/50 bg-cyan-900/10 px-4 py-3">
+          <p className="text-xs font-semibold text-cyan-400 mb-1 uppercase tracking-wide">Status</p>
+          <div className="flex items-center gap-2 text-sm text-gray-200 leading-relaxed">
+            <CheckCircleIcon className="w-5 h-5 text-cyan-400 shrink-0" />
+            <span>No unsafe wrapper patterns found. {wrapperData?.message || 'Your code looks safe.'}</span>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
-      <div className="cyber-card p-4">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-2 text-cyan-400 font-semibold">
-            <SparklesIcon className="w-5 h-5" />
-            Wrapper Generator Suggestions
-          </div>
-          <span className="text-xs px-3 py-1 rounded-full bg-[#202835] border border-[#2d3748] text-gray-300">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="text-base font-bold text-white">Safety Wrappers</h2>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Unsafe patterns and suggested safer replacements
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <SparklesIcon className="w-5 h-5 text-cyan-400" />
+          <span className="text-xs px-3 py-1 rounded-full border border-cyan-800/50 bg-cyan-900/20 text-cyan-300">
             {patternsFound} pattern{patternsFound === 1 ? '' : 's'} detected
           </span>
         </div>
-        {wrapperData?.message && (
-          <p className="text-sm text-gray-400 mt-2">{wrapperData.message}</p>
-        )}
       </div>
 
+      {wrapperData?.message && (
+        <div className="rounded-lg border border-cyan-800/50 bg-cyan-900/10 px-4 py-3">
+          <p className="text-xs font-semibold text-cyan-400 mb-1 uppercase tracking-wide">Overview</p>
+          <p className="text-sm text-gray-200 leading-relaxed">{wrapperData.message}</p>
+        </div>
+      )}
+
       {suggestions.map((s) => (
-        <div key={s.pattern_id} className="cyber-card p-4 border border-[#2d3748]">
-          <div className="flex items-center justify-between gap-3 mb-3">
-            <h4 className="font-semibold text-white text-sm">{s.suggestion_title || 'Safety Wrapper Suggested'}</h4>
-            <span className="text-xs text-gray-400">Line {s.line_number}</span>
+        <div
+          key={s.pattern_id}
+          className="rounded-lg border border-[#2d3748] bg-[#0f1623] px-5 py-4 space-y-3"
+        >
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <h3 className="text-sm font-semibold text-cyan-400">
+              {s.suggestion_title || 'Safety wrapper suggested'}
+            </h3>
+            <span className="text-xs text-gray-500">Line {s.line_number}</span>
           </div>
 
-          <p className="text-sm text-gray-300 mb-3">{s.explanation}</p>
+          {s.explanation && (
+            <p className="text-sm text-gray-300 leading-relaxed">{s.explanation}</p>
+          )}
 
           {s.changes_made?.length > 0 && (
-            <ul className="text-xs text-gray-400 list-disc list-inside mb-3 space-y-1">
+            <ul className="text-sm text-gray-400 list-disc list-inside space-y-1 pl-1">
               {s.changes_made.map((change, idx) => (
                 <li key={`${s.pattern_id}-${idx}`}>{change}</li>
               ))}
             </ul>
           )}
 
-          <div className="grid md:grid-cols-2 gap-3">
+          <div className="grid md:grid-cols-2 gap-3 pt-1">
             <div>
               <p className="text-xs text-red-400 font-semibold mb-1 flex items-center gap-1">
                 <XMarkIcon className="w-3 h-3" />
                 Original
               </p>
-              <pre className="bg-[#0a0e27] rounded-lg p-3 text-xs text-red-300 overflow-x-auto whitespace-pre-wrap break-words border border-red-900/50 max-h-64">
+              <pre className="bg-[var(--bg-primary)] rounded-lg p-3 text-xs text-red-300 overflow-x-auto whitespace-pre-wrap break-words border border-red-900/50 max-h-64 leading-relaxed">
                 {s.original_code}
               </pre>
             </div>
-
             <div>
               <p className="text-xs text-green-400 font-semibold mb-1 flex items-center gap-1">
                 <CheckCircleIcon className="w-3 h-3" />
-                Suggested Safer Version
+                Suggested safer version
               </p>
-              <pre className="bg-[#0a0e27] rounded-lg p-3 text-xs text-green-300 overflow-x-auto whitespace-pre-wrap break-words border border-green-900/50 max-h-64">
+              <pre className="bg-[var(--bg-primary)] rounded-lg p-3 text-xs text-green-300 overflow-x-auto whitespace-pre-wrap break-words border border-green-900/50 max-h-64 leading-relaxed">
                 {s.wrapped_code}
               </pre>
             </div>
@@ -189,14 +207,16 @@ function WrapperResults({ wrapperData }) {
       ))}
 
       {suggestions.length === 0 && (
-        <div className="cyber-card border-yellow-500/40 bg-yellow-500/10">
-          <div className="flex items-center gap-2 text-yellow-400 font-semibold mb-2">
-            <ExclamationTriangleIcon className="w-5 h-5" />
-            Suggestions unavailable
+        <div className="rounded-lg border border-[#2d3748] bg-[#0f1623]/80 px-5 py-4">
+          <div className="flex items-start gap-3">
+            <ExclamationTriangleIcon className="w-5 h-5 text-amber-400/90 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-gray-200">Suggestions unavailable</p>
+              <p className="text-sm text-gray-400 mt-1 leading-relaxed">
+                Unsafe patterns were detected, but suggestions could not be generated right now.
+              </p>
+            </div>
           </div>
-          <p className="text-sm text-gray-300">
-            Unsafe patterns were detected, but suggestions could not be generated right now.
-          </p>
         </div>
       )}
     </div>

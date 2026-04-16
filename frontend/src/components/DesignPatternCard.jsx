@@ -6,12 +6,12 @@ const DP_UI_BUILD = 'ml-card-2026-04-08'
 const DesignPatternCard = ({ data }) => {
   if (!data || !data.design_patterns) {
     return (
-      <div className="cyber-card p-6">
-        <h3 className="text-xl font-bold text-cyan-400 mb-4 flex items-center gap-2">
-          <span className="text-2xl">🏗️</span>
-          Design Patterns
+      <div className="rounded-lg border border-[#2d3748] bg-[#0f1623] px-5 py-4">
+        <h3 className="text-sm font-semibold text-cyan-400 mb-3 flex items-center gap-2">
+          <span className="text-lg" aria-hidden>🏗️</span>
+          Design patterns
         </h3>
-        <p className="text-gray-400">No design pattern analysis available</p>
+        <p className="text-sm text-gray-400">No design pattern analysis available</p>
       </div>
     )
   }
@@ -36,10 +36,10 @@ const DesignPatternCard = ({ data }) => {
   }
 
   return (
-    <div className="cyber-card p-6">
-      <h3 className="text-xl font-bold text-cyan-400 mb-4 flex items-center gap-2">
-        <span className="text-2xl">🏗️</span>
-        Design Patterns
+    <div className="rounded-lg border border-[#2d3748] bg-[#0f1623] px-5 py-4">
+      <h3 className="text-sm font-semibold text-cyan-400 mb-4 flex items-center gap-2">
+        <span className="text-lg" aria-hidden>🏗️</span>
+        Design patterns
       </h3>
       {analysisMethod === 'none' && (
         <p className="text-xs text-amber-400/90 mb-4">
@@ -65,7 +65,7 @@ const DesignPatternCard = ({ data }) => {
       </div>
 
       {/* Pattern Categories Legend */}
-      <div className="mt-6 pt-4 border-t border-gray-700">
+      <div className="mt-6 pt-4 border-t border-[#2d3748]">
         <h4 className="text-xs font-semibold text-gray-400 mb-2">Pattern Categories</h4>
         <div className="flex flex-wrap gap-2 text-xs">
           <span className="px-2 py-1 rounded bg-green-500/20 text-green-400">
