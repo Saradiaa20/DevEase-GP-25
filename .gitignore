@@ -18,6 +18,9 @@ __pycache__/
 backend/.env
 venv/
 
+# Keep shipped design-pattern classifier so the app works without retraining
+!backend/design_pattern_models/*.pkl
+
 # Node
 node_modules/
 dist/
