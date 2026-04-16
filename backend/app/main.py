@@ -671,6 +671,34 @@ async def health_check():
         "version": "1.0.0"
     }
 
+@app.get("/api/design-pattern-pipeline")
+async def design_pattern_pipeline_info():
+    """
+    Debug: which design-pattern code is running.
+    New backend only returns analysis_method `tabular_ml` or `none`.
+    If you ever see `heuristic` in analyze responses, that process is OLD code — restart uvicorn from this repo's `backend/` folder.
+    """
+    import design_pattern_detector as dp_mod
+    from pathlib import Path
+
+    model_dir = Path(dp_mod.MODEL_DIR)
+    files = {
+        "best_model.pkl": model_dir.joinpath("best_model.pkl").is_file(),
+        "label_encoder.pkl": model_dir.joinpath("label_encoder.pkl").is_file(),
+        "feature_columns.pkl": model_dir.joinpath("feature_columns.pkl").is_file(),
+    }
+    det = dp_mod.DesignPatternDetector()
+    loaded = det.load_model()
+    sample = det.get_pattern_summary("def f():\n    pass\n", "Python")
+    method = sample.get("design_patterns", {}).get("analysis_method")
+    return {
+        "design_pattern_detector_file": str(Path(dp_mod.__file__).resolve()),
+        "model_files_present": files,
+        "model_loaded": loaded,
+        "sample_analysis_method": method,
+        "note": "analysis_method must be tabular_ml or none. Value heuristic means a stale server running pre-refactor code.",
+    }
+
 
 @app.get("/api/supported-extensions")
 async def get_supported_extensions():
