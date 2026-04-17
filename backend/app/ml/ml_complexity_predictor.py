@@ -11,15 +11,20 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.impute import SimpleImputer
 import joblib
 import os
+import re
 from typing import Dict, List, Tuple, Any
+
+from app.core.config import BASE_DIR
 
 class ComplexityPredictor:
     """
     Machine Learning model for predicting code complexity based on code features
     """
     
-    def __init__(self, model_path="complexity_model.pkl"):
-        self.model_path = model_path
+    def __init__(self):
+        BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+    
+        self.model_path = os.path.join(BASE_DIR, "ml", "models", "complexity_model.pkl")
         self.model = None
         self.scaler = StandardScaler()
         self.label_encoder = LabelEncoder()
@@ -36,6 +41,7 @@ class ComplexityPredictor:
             'n_square': 'O(n²)',
             'nlogn': 'O(n log n)'
         }
+        self._model_loaded = False  # Track if model is loaded
 
     def verify_preprocessing(self, csv_path: str) -> bool:
         """
@@ -244,7 +250,7 @@ class ComplexityPredictor:
                 best_model_name = name
                 self.model = model
         print("-"*50)
-        print("\nML traniny models")
+        print("\nML tranined models")
         print("\nModel Comparison Results:")
         for name, accuracy in results.items():
             print(f"  {name}: {accuracy:.4f}")
@@ -347,6 +353,7 @@ class ComplexityPredictor:
                     self.model = model_data
                     print(f"WARNING: Model loaded from: {self.model_path} (legacy format - no preprocessing)")
                 
+                self._model_loaded = True
                 return True
             else:
                 print(f"ERROR: Model file not found: {self.model_path}")
@@ -357,7 +364,7 @@ class ComplexityPredictor:
     
     def predict_complexity(self, features: Dict[str, int]) -> Dict[str, Any]:
         """Predict complexity for given features with advanced preprocessing"""
-        if self.model is None:
+        if self.model is None or not self._model_loaded:
             if not self.load_model():
                 return {"error": "No trained model available"}
         
@@ -389,10 +396,6 @@ class ComplexityPredictor:
             }], columns=self.feature_columns)
             
             # Apply same preprocessing as training
-            feature_vector_imputed = self.imputer.transform(feature_vector)
-            feature_vector_scaled = self.scaler.transform(feature_vector_imputed)
-            
-            # Apply imputer and scaler (no warnings now)
             X_imputed = self.imputer.transform(X)
             X_scaled = self.scaler.transform(X_imputed)
 
@@ -420,7 +423,7 @@ class ComplexityPredictor:
             return {"error": f"Prediction failed: {e}"}
     
     def extract_features_from_code(self, code_content: str) -> Dict[str, int]:
-        """Extract complexity features from code content"""
+        """Extract complexity features from code content (optimized)"""
         features = {
             'no_of_ifs': 0,
             'no_of_loop': 0,
@@ -434,50 +437,55 @@ class ComplexityPredictor:
         }
         
         lines = code_content.split('\n')
+        content_lower = code_content.lower()
         
-        # Count basic features
+        # Use compiled regex patterns for better performance
+        if_pattern = re.compile(r'\bif\s*[\(]')
+        loop_pattern = re.compile(r'\b(for|while|do)\s+')
+        break_pattern = re.compile(r'\bbreak\b')
+        
+        # Count basic features (single pass)
         for line in lines:
             line_lower = line.lower().strip()
             
             # Count if statements
-            if 'if ' in line_lower or 'if(' in line_lower:
+            if if_pattern.search(line_lower):
                 features['no_of_ifs'] += 1
             
             # Count loops
-            if any(loop in line_lower for loop in ['for ', 'while ', 'do ']):
+            if loop_pattern.search(line_lower):
                 features['no_of_loop'] += 1
             
             # Count break statements
-            if 'break' in line_lower:
+            if break_pattern.search(line_lower):
                 features['no_of_break'] += 1
-            
-            # Check for data structures
-            if 'priorityqueue' in line_lower or 'priority_queue' in line_lower:
-                features['priority_queue_present'] = 1
-            
-            if 'sort' in line_lower or 'sorted' in line_lower:
-                features['no_of_sort'] += 1
-            
-            if 'hashset' in line_lower or 'set' in line_lower:
-                features['hash_set_present'] = 1
-            
-            if 'hashmap' in line_lower or 'map' in line_lower:
-                features['hash_map_present'] = 1
-            
-            # Check for recursion (simplified)
-            if 'return' in line_lower and any(func in line_lower for func in ['self.', 'this.']):
-                features['recursion_present'] = 1
         
-        # Calculate nested loop depth (simplified)
+        # Check for data structures (single pass through content)
+        if 'priorityqueue' in content_lower or 'priority_queue' in content_lower:
+            features['priority_queue_present'] = 1
+        
+        features['no_of_sort'] = len(re.findall(r'\b(sort|sorted)\s*\(', content_lower))
+        
+        if 'hashset' in content_lower or ('set' in content_lower and 'hash' in content_lower):
+            features['hash_set_present'] = 1
+        
+        if 'hashmap' in content_lower or ('map' in content_lower and 'hash' in content_lower):
+            features['hash_map_present'] = 1
+        
+        # Check for recursion
+        if re.search(r'\breturn\b.*\b(self\.|this\.)', content_lower):
+            features['recursion_present'] = 1
+        
+        # Calculate nested loop depth (optimized)
         max_depth = 0
         current_depth = 0
         
         for line in lines:
-            line_lower = line.strip()
-            if any(loop in line_lower for loop in ['for ', 'while ', 'do ']):
+            line_stripped = line.strip()
+            if loop_pattern.search(line_stripped):
                 current_depth += 1
                 max_depth = max(max_depth, current_depth)
-            elif line_lower.startswith('}') or line_lower.startswith('end'):
+            elif line_stripped.startswith('}') or line_stripped.startswith('end'):
                 current_depth = max(0, current_depth - 1)
         
         features['nested_loop_depth'] = max_depth
@@ -496,17 +504,18 @@ class ComplexityPredictor:
         print(f"Description: {prediction_result['complexity_description']}")
         print(f"Confidence: {prediction_result['confidence']:.2%}")
         
-        print("\nAll Complexity Probabilities:")
-        for complexity, prob in prediction_result['all_probabilities'].items():
-            desc = self.complexity_mapping.get(complexity, complexity)
-            print(f"  {desc}: {prob:.2%}")
+        # print("\nAll Complexity Probabilities:")
+        # for complexity, prob in prediction_result['all_probabilities'].items():
+        #     desc = self.complexity_mapping.get(complexity, complexity)
+        #     print(f"  {desc}: {prob:.2%}")
 
 def main():
     """Main function to train the model"""
     predictor = ComplexityPredictor()
     
+    BASE_DIR = os.path.dirname(os.path.dirname(__file__))  
+    dataset_path = os.path.join(BASE_DIR, "dataset", "dataset1.csv")
     # Train the model with force retrain to see advanced preprocessing
-    dataset_path = os.path.join(os.path.dirname(__file__), "dataset1.csv")
     success = predictor.train_model(dataset_path, force_retrain=True)
     
     if success:

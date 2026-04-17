@@ -1,7 +1,7 @@
 import os
 import shutil
 import sys
-from parsing import ASTParser
+from app.ml.parsing import ASTParser
 
 class FileHandler:
     SUPPORTED_EXTENSIONS = ['.java', '.py']

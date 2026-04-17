@@ -8,10 +8,10 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from dp_tabular_features import FEATURE_COLUMN_ORDER, extract_tabular_features
+from app.ml.dp_tabular_features import FEATURE_COLUMN_ORDER, extract_tabular_features
 
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_DIR = os.path.join(BACKEND_DIR, "design_pattern_models")
+MODEL_DIR = os.path.join(BACKEND_DIR, "ml", "models", "design_pattern_models")
 
 
 PATTERN_CATEGORY: Dict[str, str] = {

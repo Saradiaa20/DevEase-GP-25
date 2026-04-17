@@ -2,9 +2,9 @@ import ast
 import os
 
 from sklearn import tree
-from code_smell_detector import CodeSmellDetector
-from code_quality_metrics import CodeQualityAnalyzer
-from ml_complexity_predictor import ComplexityPredictor
+from app.ml.code_smell_detector import CodeSmellDetector
+from app.services.code_quality_metrics import CodeQualityAnalyzer
+from app.ml.ml_complexity_predictor import ComplexityPredictor
 
 try:
     import javalang

@@ -10,7 +10,7 @@ import json
 from typing import List, Dict, Any, Optional
 
 from groq import Groq
-from wrapper_detector import UnsafePattern
+from app.ml.wrapper_detector import UnsafePattern
 
 
 # ─── Prompts ─────────────────────────────────────────────────────────────────

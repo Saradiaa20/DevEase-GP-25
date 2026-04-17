@@ -55,7 +55,7 @@ def verify_ml_model():
     if not model_exists:
         print_warning("ML model not found. Will attempt to train...")
         try:
-            from ml_complexity_predictor import ComplexityPredictor
+            from app.ml.ml_complexity_predictor import ComplexityPredictor
             predictor = ComplexityPredictor()
             print("Training ML model...")
             success = predictor.train_model(str(dataset_path), force_retrain=True)
@@ -76,7 +76,7 @@ def verify_ml_prediction():
     print_header("2. ML Prediction Verification")
     
     try:
-        from ml_complexity_predictor import ComplexityPredictor
+        from app.ml.ml_complexity_predictor import ComplexityPredictor
         
         predictor = ComplexityPredictor()
         
@@ -143,7 +143,7 @@ def verify_analysis_pipeline():
     print_header("4. Complete Analysis Pipeline Verification")
     
     try:
-        from feature_router import FeatureRouter
+        from app.api.feature_router import FeatureRouter
         
         router = FeatureRouter()
         
@@ -242,7 +242,7 @@ def verify_api_structure():
     print_header("5. API Response Structure Verification")
     
     try:
-        from feature_router import FeatureRouter
+        from app.api.feature_router import FeatureRouter
         
         router = FeatureRouter()
         

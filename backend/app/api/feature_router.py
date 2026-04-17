@@ -5,13 +5,13 @@ Routes extracted features to various analysis modules and coordinates the analys
 
 from typing import Dict, Any, Optional, List
 import unicodedata
-from parsing import ASTParser
-from code_smell_detector import CodeSmellDetector
-from code_quality_metrics import CodeQualityAnalyzer
-from ml_complexity_predictor import ComplexityPredictor
-from technical_debt_calculator import TechnicalDebtCalculator, TechnicalDebtMetrics
-from design_pattern_detector import DesignPatternDetector
-from nlp_explainer import generate_nlp_report
+from app.ml.parsing import ASTParser
+from app.ml.code_smell_detector import CodeSmellDetector
+from app.services.code_quality_metrics import CodeQualityAnalyzer
+from app.ml.ml_complexity_predictor import ComplexityPredictor
+from app.services.technical_debt_calculator import TechnicalDebtCalculator, TechnicalDebtMetrics
+from app.ml.design_pattern_detector import DesignPatternDetector
+from app.services.nlp_explainer import generate_nlp_report
 import os
 
 

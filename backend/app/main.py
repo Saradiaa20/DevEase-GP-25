@@ -497,17 +497,17 @@ from datetime import datetime, timedelta
 backend_root = Path(__file__).parent.parent
 sys.path.insert(0, str(backend_root))
 
-from parsing import ASTParser
-from file_handler import FileHandler
-from feature_router import FeatureRouter, EmptyCodeError
-from nlp_explainer import generate_nlp_report
-from wrapper_detector import detect_unsafe_patterns, patterns_to_dict
-from wrapper_groq import WrapperSuggestionGenerator
-from app.models import (
+from app.ml.parsing import ASTParser
+from app.services.file_handler import FileHandler
+from app.api.feature_router import FeatureRouter, EmptyCodeError
+from app.services.nlp_explainer import generate_nlp_report
+from app.ml.wrapper_detector import detect_unsafe_patterns, patterns_to_dict
+from app.services.ai.wrapper_groq import WrapperSuggestionGenerator
+from app.models.models import (
     User, UserCreate, UserLogin, Project, ProjectCreate, 
     AnalysisResult, Token, UserRole
 )
-from app.auth import (
+from app.core.auth import (
     get_password_hash, verify_password, create_access_token,
     decode_token, check_permission, USERS_DB, PROJECTS_DB
 )
@@ -528,7 +528,7 @@ app.add_middleware(
 )
 
 # Wrapper Generator feature
-from wrapper_router import router as wrapper_router
+from app.api.wrapper_router import router as wrapper_router
 app.include_router(wrapper_router)
 
 # Initialize components
@@ -678,7 +678,7 @@ async def design_pattern_pipeline_info():
     New backend only returns analysis_method `tabular_ml` or `none`.
     If you ever see `heuristic` in analyze responses, that process is OLD code — restart uvicorn from this repo's `backend/` folder.
     """
-    import design_pattern_detector as dp_mod
+    import app.ml.design_pattern_detector as dp_mod
     from pathlib import Path
 
     model_dir = Path(dp_mod.MODEL_DIR)

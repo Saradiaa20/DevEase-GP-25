@@ -16,11 +16,11 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.svm import SVC
 
-from dp_tabular_features import FEATURE_COLUMN_ORDER
+from app.ml.dp_tabular_features import FEATURE_COLUMN_ORDER
 
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.join(BACKEND_DIR, "FINAL_DESIGNPATTERNDB.csv")
-OUT_DIR = os.path.join(BACKEND_DIR, "design_pattern_models")
+DATA_PATH = os.path.join(os.path.dirname(BACKEND_DIR),"dataset", "FINAL_DESIGNPATTERNDB.csv")
+OUT_DIR = os.path.join(BACKEND_DIR, "ml", "models", "design_pattern_models")
 
 def main():
     if not os.path.isfile(DATA_PATH):

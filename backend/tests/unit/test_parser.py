@@ -1,5 +1,5 @@
 import os
-from app.parsing import ASTParser
+from app.ml.parsing import ASTParser
 
 def test_python_parsing():
     parser = ASTParser()

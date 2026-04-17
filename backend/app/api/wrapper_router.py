@@ -26,9 +26,9 @@ _backend_dir = Path(__file__).resolve().parent          # backend/
 if str(_backend_dir) not in sys.path:
     sys.path.insert(0, str(_backend_dir))
 
-from wrapper_detector import detect_unsafe_patterns, patterns_to_dict
-from wrapper_groq import WrapperSuggestionGenerator
-from file_handler import FileHandler   # already in this project
+from app.ml.wrapper_detector import detect_unsafe_patterns, patterns_to_dict
+from app.services.ai.wrapper_groq import WrapperSuggestionGenerator
+from app.services.file_handler import FileHandler   # already in this project
 
 
 router = APIRouter(prefix="/api/wrapper", tags=["Wrapper Generator"])
