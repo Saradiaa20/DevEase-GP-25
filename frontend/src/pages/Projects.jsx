@@ -63,11 +63,11 @@ function Projects() {
         </div>
 
         {loading ? (
-          <div className="cyber-card text-center py-12">
+          <div className="cyber-card-panel text-center py-12">
             <div className="text-gray-400">Loading projects...</div>
           </div>
         ) : projects.length === 0 ? (
-          <div className="cyber-card text-center py-12">
+          <div className="cyber-card-panel text-center py-12">
             <FolderIcon className="w-16 h-16 mx-auto mb-4 text-gray-500" />
             <p className="text-gray-400">No projects available</p>
           </div>
@@ -77,7 +77,7 @@ function Projects() {
               <Link
                 key={project.id}
                 to={`/projects/${project.id}`}
-                className="cyber-card hover:border-cyan-500/50 transition-all group"
+                className="cyber-card-panel hover:border-cyan-500/50 transition-all group"
               >
                 <div className="flex items-start justify-between mb-4">
                   <FolderIcon className="w-8 h-8 text-cyan-400 group-hover:text-cyan-300" />
@@ -103,7 +103,7 @@ function Projects() {
         {/* Create Project Modal - Hidden for now (feature not fully implemented)
         {showCreateModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="cyber-card max-w-md w-full mx-4">
+            <div className="cyber-card-panel max-w-md w-full mx-4">
               <h2 className="text-2xl font-bold text-white mb-4">Create New Project</h2>
               <form onSubmit={handleCreateProject} className="space-y-4">
                 <div>

@@ -44,7 +44,7 @@ function Login() {
 
   return (
     <div className="min-h-screen cyber-bg flex items-center justify-center p-6">
-      <div className="cyber-card max-w-md w-full">
+      <div className="cyber-card-panel max-w-md w-full">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4 glow-cyan">
             <span className="text-white font-bold text-3xl">D</span>
@@ -68,7 +68,7 @@ function Login() {
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-2 bg-[#202835] border border-[#2d3748] rounded-lg text-white focus:outline-none focus:border-cyan-500"
+                className="w-full px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-lg text-white focus:outline-none focus:border-cyan-500"
                 placeholder="your@email.com"
               />
             </div>
@@ -83,7 +83,7 @@ function Login() {
               required
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              className="w-full px-4 py-2 bg-[#202835] border border-[#2d3748] rounded-lg text-white focus:outline-none focus:border-cyan-500"
+              className="w-full px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-lg text-white focus:outline-none focus:border-cyan-500"
               placeholder="username"
             />
           </div>
@@ -97,7 +97,7 @@ function Login() {
               required
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-4 py-2 bg-[#202835] border border-[#2d3748] rounded-lg text-white focus:outline-none focus:border-cyan-500"
+              className="w-full px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-lg text-white focus:outline-none focus:border-cyan-500"
               placeholder="••••••••"
             />
           </div>
@@ -110,7 +110,7 @@ function Login() {
               <select
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="w-full px-4 py-2 bg-[#202835] border border-[#2d3748] rounded-lg text-white focus:outline-none focus:border-cyan-500"
+                className="w-full px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-lg text-white focus:outline-none focus:border-cyan-500"
               >
                 <option value="developer">Developer</option>
                 <option value="team_lead">Team Lead</option>

@@ -175,36 +175,36 @@ function Dashboard() {
   }
 
   const metrics = getMetrics()
+  const showResults = !!analysisData
+
+  const handleNewAnalysis = () => {
+    setAnalysisData(null)
+    setError(null)
+    setSelectedFile(null)
+  }
+
+  const dashboardSubtitle = showResults
+    ? 'Review metrics, tabs, and detailed analysis below.'
+    : 'Analyze your code and track quality metrics'
 
   return (
     <Layout>
       <div className="p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Main Dashboard</h1>
-            <p className="text-gray-400">Analyze your code and track quality metrics</p>
-          </div>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left Column - Code Input */}
-          <div className="lg:col-span-1">
-            <div className="cyber-card">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-white flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Code Input
-                </h2>
-                {analysisData?.language && (
-                  <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium">
-                    {analysisData.language}
-                  </span>
-                )}
+        {!showResults ? (
+          <div className="max-w-6xl mx-auto w-full space-y-6 min-h-[min(72vh,calc(100vh-14rem))]">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-2">Main Dashboard</h1>
+                <p className="text-gray-400">{dashboardSubtitle}</p>
               </div>
-
+            </div>
+            {error && (
+              <div className="cyber-card border-red-500/50 bg-red-500/10 p-4">
+                <div className="text-red-400 font-semibold mb-2">Error</div>
+                <div className="text-gray-300 text-sm whitespace-pre-wrap">{error}</div>
+              </div>
+            )}
+            <div className="cyber-card-panel">
               <FileUpload
                 onFileUpload={handleFileUpload}
                 onContentAnalysis={handleContentAnalysis}
@@ -212,7 +212,7 @@ function Dashboard() {
               />
 
               {selectedFile && (
-                <div className="mt-4 p-3 bg-[#202835] rounded-lg border border-[#2d3748]">
+                <div className="mt-4 p-3 bg-[var(--bg-panel)] rounded-lg border border-[var(--border-primary)]">
                   <div className="flex items-center space-x-2 text-green-400">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -223,10 +223,21 @@ function Dashboard() {
               )}
             </div>
           </div>
-
-          {/* Right Column - Results */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Summary Cards */}
+        ) : (
+          <div className="max-w-6xl mx-auto w-full space-y-6">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-2">Main Dashboard</h1>
+                <p className="text-gray-400">{dashboardSubtitle}</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleNewAnalysis}
+                className="shrink-0 px-4 py-2 rounded-lg text-sm font-medium border border-[var(--border-primary)] bg-[var(--bg-panel)] text-cyan-400 hover:border-cyan-500/50 hover:bg-[var(--bg-card-hover)] transition-colors"
+              >
+                New Analysis
+              </button>
+            </div>
             {metrics && (
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 <MetricCard
@@ -253,7 +264,6 @@ function Dashboard() {
               </div>
             )}
 
-            {/* Analysis Results */}
             {error && (
               <div className="cyber-card border-red-500/50 bg-red-500/10 p-4">
                 <div className="text-red-400 font-semibold mb-2">Error</div>
@@ -261,23 +271,9 @@ function Dashboard() {
               </div>
             )}
 
-            {analysisData && (
-              <AnalysisResults data={analysisData} />
-            )}
-
-            {/* Empty State */}
-            {!analysisData && !loading && (
-              <div className="cyber-card text-center py-12">
-                <div className="text-gray-400 mb-4">
-                  <svg className="w-16 h-16 mx-auto mb-4 text-cyan-400/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <p className="text-gray-400">Upload a file or paste code to start analysis</p>
-              </div>
-            )}
+            <AnalysisResults data={analysisData} />
           </div>
-        </div>
+        )}
       </div>
     </Layout>
   )

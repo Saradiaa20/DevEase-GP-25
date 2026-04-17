@@ -7,6 +7,8 @@
   --bg-secondary: #141b2d;
   --bg-card: #1a2332;
   --bg-card-hover: #202835;
+  /* Raised panels (report body, nav, code input) — matches NLPReport / analysis cards */
+  --bg-panel: #0f1623;
   
   /* Accent Colors */
   --accent-cyan: #00d9ff;
@@ -128,6 +130,7 @@ html[data-theme="light"] {
   --bg-secondary: #e2e8f0;
   --bg-card: #ffffff;
   --bg-card-hover: #f1f5f9;
+  --bg-panel: #ffffff;
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #64748b;
@@ -142,6 +145,22 @@ html[data-theme="light"] {
 /* Theme-aware layout (use these on nav/sidebar so they follow theme) */
 .theme-bg-secondary {
   background: var(--bg-secondary);
+}
+.theme-bg-panel {
+  background: var(--bg-panel);
+}
+
+/* Code input column — same surface as analysis report cards */
+.cyber-card-panel {
+  padding: 1.5rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+.cyber-card-panel:hover {
+  border-color: var(--border-accent);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 .theme-border {
   border-color: var(--border-primary);
@@ -181,6 +200,7 @@ html.high-contrast {
   --bg-secondary: #171717;
   --bg-card: #262626;
   --bg-card-hover: #404040;
+  --bg-panel: #262626;
 }
 html.high-contrast[data-theme="light"] {
   /* when both light + high contrast, keep light surfaces but max contrast */
@@ -192,6 +212,7 @@ html.high-contrast[data-theme="light"] {
   --bg-secondary: #f3f4f6;
   --bg-card: #ffffff;
   --bg-card-hover: #e5e7eb;
+  --bg-panel: #ffffff;
 }
 
 /* ---------------------------------------------------------------------------

@@ -2,21 +2,17 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
 HomeIcon,
-ChartBarIcon,
 FolderIcon,
-DocumentTextIcon,
 Cog6ToothIcon,
 UserIcon,
-ArrowRightOnRectangleIcon,
 BookOpenIcon,
 ArrowDownIcon,
-UserCircleIcon
+ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline'
-import { getCurrentUser, logoutUser } from '../services/api'
+import { logoutUser } from '../services/api'
 
 function Layout({ children }) {
 const location = useLocation()
-const user = getCurrentUser()
 const [showExportMenu, setShowExportMenu] = useState(false)
 const exportMenuRef = useRef(null)
 
@@ -178,7 +174,6 @@ const navigation = [
 { name: 'Projects', href: '/projects', icon: FolderIcon },
 { name: 'Analysis History', href: '/history', icon: BookOpenIcon },
 { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
-{ name: 'Profile', href: '/profile', icon: UserIcon },
 ]
 
 const isActive = (path) => location.pathname === path
@@ -186,7 +181,7 @@ const isActive = (path) => location.pathname === path
 return (
 <div className="min-h-screen cyber-bg">
 {/* Top Navigation Bar */}
-<nav className="theme-bg-secondary border-b theme-border sticky top-0 z-50">
+<nav className="theme-bg-panel border-b theme-border sticky top-0 z-50">
 <div className="px-4 sm:px-6 lg:px-8">
 <div className="flex items-center h-16">
 {/* Logo - positioned to align with sidebar */}
@@ -197,16 +192,8 @@ return (
 <span className="text-xl font-bold theme-text-primary">DevEase</span>
 </Link>
 
-{/* Right side actions */}
+{/* Right side: Export + Profile only */}
 <div className="flex items-center space-x-4 ml-auto">
-<Link
-to="/history"
-className="flex items-center space-x-2 px-3 py-2 rounded-lg theme-hover-bg transition-colors theme-nav-link"
->
-<BookOpenIcon className="w-5 h-5" />
-<span className="hidden sm:inline">History</span>
-</Link>
-
 <div className="relative" ref={exportMenuRef}>
 <button
 onClick={() => setShowExportMenu(!showExportMenu)}
@@ -218,25 +205,25 @@ className="flex items-center space-x-2 px-3 py-2 rounded-lg theme-hover-bg trans
 
 {/* Export Dropdown Menu */}
 {showExportMenu && (
-<div className="absolute right-0 mt-2 w-48 bg-[#1c2128] border border-[#30363d] rounded-lg shadow-xl z-50">
+<div className="absolute right-0 mt-2 w-48 theme-bg-panel border theme-border rounded-lg shadow-xl z-50">
 <div className="py-1">
 <button
 onClick={() => exportAnalysis('json')}
-className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-[#30363d] flex items-center space-x-2"
+className="w-full text-left px-4 py-2 text-sm text-gray-300 theme-hover-bg flex items-center space-x-2"
 >
 <span className="text-cyan-400">{'{ }'}</span>
 <span>Export as JSON</span>
 </button>
 <button
 onClick={() => exportAnalysis('txt')}
-className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-[#30363d] flex items-center space-x-2"
+className="w-full text-left px-4 py-2 text-sm text-gray-300 theme-hover-bg flex items-center space-x-2"
 >
 <span className="text-green-400">📄</span>
 <span>Export as Report (TXT)</span>
 </button>
 <button
 onClick={() => exportAnalysis('csv')}
-className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-[#30363d] flex items-center space-x-2"
+className="w-full text-left px-4 py-2 text-sm text-gray-300 theme-hover-bg flex items-center space-x-2"
 >
 <span className="text-yellow-400">📊</span>
 <span>Export Smells (CSV)</span>
@@ -247,25 +234,12 @@ className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-[#30363d] f
 </div>
 
 <Link
-to="/settings"
+to="/profile"
 className="flex items-center space-x-2 px-3 py-2 rounded-lg theme-hover-bg transition-colors theme-nav-link"
 >
-<UserCircleIcon className="w-5 h-5" />
-<span className="hidden sm:inline">Accessibility</span>
+<UserIcon className="w-5 h-5" />
+<span className="hidden sm:inline">Profile</span>
 </Link>
-
-{user && (
-<button
-onClick={() => {
-logoutUser()
-window.location.href = '/'
-}}
-className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-[var(--bg-card)] transition-colors text-red-400 hover:text-red-300"
->
-<ArrowRightOnRectangleIcon className="w-5 h-5" />
-<span className="hidden sm:inline">Logout</span>
-</button>
-)}
 </div>
 </div>
 </div>
@@ -273,9 +247,10 @@ className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-[var(--bg-c
 
 {/* Main Content */}
 <div className="flex">
-{/* Sidebar Navigation */}
-<aside className="w-64 theme-bg-secondary border-r theme-border min-h-[calc(100vh-4rem)] hidden lg:block">
-<nav className="p-4 space-y-2">
+{/* Sidebar: links scroll; Logout pinned to bottom of viewport column */}
+<aside className="hidden lg:flex w-64 shrink-0 flex-col theme-bg-panel border-r theme-border min-h-[calc(100vh-4rem)]">
+<nav className="flex flex-1 flex-col min-h-0 p-4">
+<div className="min-h-0 flex-1 overflow-y-auto space-y-2">
 {navigation.map((item) => {
 const Icon = item.icon
 const active = isActive(item.href)
@@ -293,6 +268,20 @@ className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${ac
 </Link>
 )
 })}
+</div>
+<div className="shrink-0 pt-4 mt-auto border-t theme-border">
+<button
+type="button"
+onClick={() => {
+logoutUser()
+window.location.href = '/'
+}}
+className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all theme-nav-link theme-hover-bg text-red-400 hover:text-red-300"
+>
+<ArrowRightOnRectangleIcon className="w-5 h-5 shrink-0" />
+<span className="font-medium">Logout</span>
+</button>
+</div>
 </nav>
 </aside>
 

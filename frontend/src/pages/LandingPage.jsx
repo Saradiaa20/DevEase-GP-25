@@ -26,7 +26,6 @@ function LandingPage() {
               </div>
               <div>
                 <span className="text-2xl font-bold text-white">DevEase</span>
-                <span className="text-lg text-cyan-400 ml-1">AI</span>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -67,7 +66,7 @@ function LandingPage() {
             </Link>
             <Link
               to="/dashboard"
-              className="px-8 py-4 bg-[#1a2332] border border-cyan-500/50 text-cyan-400 rounded-lg font-semibold text-lg hover:bg-[#202835] hover:border-cyan-500 transition-all"
+              className="px-8 py-4 bg-[var(--bg-panel)] border border-cyan-500/50 text-cyan-400 rounded-lg font-semibold text-lg hover:bg-[var(--bg-card-hover)] hover:border-cyan-500 transition-all"
             >
               View Demo
             </Link>
@@ -125,7 +124,7 @@ function FeatureCard({ icon: Icon, title, description, color }) {
   }
 
   return (
-    <div className="cyber-card hover:border-cyan-500/50">
+    <div className="cyber-card-panel hover:border-cyan-500/50">
       <div className={`w-12 h-12 ${colorClasses[color]} rounded-lg flex items-center justify-center mb-4`}>
         <Icon className="w-6 h-6" />
       </div>

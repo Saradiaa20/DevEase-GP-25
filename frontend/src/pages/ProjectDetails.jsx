@@ -46,7 +46,7 @@ function ProjectDetails() {
     return (
       <Layout>
         <div className="p-6">
-          <div className="cyber-card text-center py-12">
+          <div className="cyber-card-panel text-center py-12">
             <div className="text-gray-400">Loading project...</div>
           </div>
         </div>
@@ -72,7 +72,7 @@ function ProjectDetails() {
         </div>
 
         {/* Project Info */}
-        <div className="cyber-card">
+        <div className="cyber-card-panel">
           <h2 className="text-xl font-semibold text-white mb-4">Project Information</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
@@ -89,7 +89,7 @@ function ProjectDetails() {
         </div>
 
         {/* Analyses List */}
-        <div className="cyber-card">
+        <div className="cyber-card-panel">
           <h2 className="text-xl font-semibold text-white mb-4">Analyses</h2>
           {analyses.length === 0 ? (
             <div className="text-center py-8 text-gray-400">
@@ -100,7 +100,7 @@ function ProjectDetails() {
               {analyses.map((analysis) => (
                 <div
                   key={analysis.id}
-                  className="p-4 bg-[#202835] rounded-lg border border-[#2d3748] hover:border-cyan-500/50 transition-colors"
+                  className="p-4 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-primary)] hover:border-cyan-500/50 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div>
