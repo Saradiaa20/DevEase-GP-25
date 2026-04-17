@@ -19,7 +19,7 @@ CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
 # File Upload Configuration
 MAX_UPLOAD_SIZE = int(os.getenv("MAX_UPLOAD_SIZE", 10 * 1024 * 1024))  # 10MB
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", str(BASE_DIR / "uploads"))
-ALLOWED_EXTENSIONS = ['.py', '.java', '.js', '.cpp', '.cs', '.php']
+ALLOWED_EXTENSIONS = ['.py', '.java']
 
 # Model Configuration
 MODEL_PATH = os.getenv("MODEL_PATH", str(BASE_DIR / "complexity_model.pkl"))
