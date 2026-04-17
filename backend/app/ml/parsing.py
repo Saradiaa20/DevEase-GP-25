@@ -1,4 +1,5 @@
 import ast
+import code
 import os
 
 from sklearn import tree
@@ -54,6 +55,12 @@ class ASTParser:
 
         elif ext == ".java":
             ast_result = self._parse_java_ast(code)
+
+            if javalang is None:
+                return {
+                    "language": "Java",
+                    "error": "javalang is not installed"
+                }
 
             if "error" in ast_result:
                 return {
@@ -205,6 +212,16 @@ class ASTParser:
                 "error": "Invalid or incomplete Java code"
             }
 
+        if javalang is None:
+            return {
+                "language": "Java",
+                "error": "javalang is not installed"
+            }
+        
+        loops = code.count("for(") + code.count("while(")
+        ifs = code.count("if(")
+
+        cc = 1 + loops + ifs
         classes = [cls.name for cls in tree.types if hasattr(cls, 'name')]
         methods = [method.name for cls in tree.types for method in getattr(cls, 'methods', [])]
         fields = [field.declarators[0].name for cls in tree.types for field in getattr(cls, 'fields', [])]
@@ -221,5 +238,8 @@ class ASTParser:
             "total_classes": len(classes),
             "total_methods": len(methods),
             "lines_of_code": len(code.splitlines()),
+            "loops": loops,
+            "ifs": ifs,
+            "cyclomatic_complexity": cc,
             "_raw_source": code
         }   
