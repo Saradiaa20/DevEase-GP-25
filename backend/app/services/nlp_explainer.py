@@ -341,8 +341,17 @@ def _call_groq_generate_sections(analysis_data: Dict[str, Any], api_key: str, mo
                 "content": (
                     "Create a dynamic NLP explanation report for this analysis data. "
                     "Explain what scores mean, severity of problems, and concrete improvements.\n\n"
+
+                    "IMPORTANT:\n"
+                    "For the design_patterns section ONLY, use this exact format:\n"
+                    "The predicted design pattern category is <category>. "
+                    "The suggested pattern is <pattern>, which <short explanation>. "
+                    "The code can benefit from using design patterns to improve its structure and maintainability.\n\n"
+
+                    "Keep all other sections unchanged and professional.\n\n"
+
                     + json.dumps(compact, ensure_ascii=True)
-                ),
+                )
             },
         ],
     }
