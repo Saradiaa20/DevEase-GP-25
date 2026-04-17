@@ -7,19 +7,30 @@ function FileUpload({ onFileUpload, onContentAnalysis, loading }) {
   /** 'upload' = drag/drop only; 'paste' = textarea only */
   const [inputMode, setInputMode] = useState('upload')
 
-  const onDrop = useCallback((acceptedFiles) => {
-    if (acceptedFiles.length > 0) {
-      onFileUpload(acceptedFiles[0])
-    }
-  }, [onFileUpload])
+  const isPyOrJava = useCallback((file) => {
+    const name = (file?.name || '').toLowerCase()
+    return name.endsWith('.py') || name.endsWith('.java')
+  }, [])
+
+  const onDrop = useCallback(
+    (acceptedFiles) => {
+      if (acceptedFiles.length > 0) {
+        onFileUpload(acceptedFiles[0])
+      }
+    },
+    [onFileUpload]
+  )
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
-    // Windows often serves .py/.java as application/octet-stream — include it so picks aren't dropped silently
+    // Avoid `text/*` — on Windows it widens the picker (e.g. Excel, CSV). Lock to extensions + common MIME hints.
     accept: {
-      'text/*': ['.py', '.java'],
+      'text/x-python': ['.py'],
+      'text/x-java-source': ['.java'],
+      'application/x-python-code': ['.py'],
       'application/octet-stream': ['.py', '.java'],
     },
+    validator: (file) => (isPyOrJava(file) ? null : { code: 'file-invalid-type', message: 'Only .py and .java files are allowed.' }),
     maxFiles: 1,
     disabled: loading,
   })
@@ -34,7 +45,14 @@ function FileUpload({ onFileUpload, onContentAnalysis, loading }) {
   return (
     <div className="space-y-4">
       {/* Keep file input mounted so open() works from "Upload File" (same as old direct picker) */}
-      <input {...getInputProps()} className="sr-only" aria-hidden />
+      <input
+        {...getInputProps({
+          // Native filter for the OS file dialog (esp. Windows)
+          accept: '.py,.java,.PY,.JAVA',
+        })}
+        className="sr-only"
+        aria-hidden
+      />
 
       {/* Title + mode toggles on one row */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
