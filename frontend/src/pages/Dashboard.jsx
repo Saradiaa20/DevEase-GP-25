@@ -19,6 +19,43 @@ function formatApiError(err) {
   return err.message || 'Analysis failed'
 }
 
+function detectPastedCodeExtension(content = '') {
+  const javaPatterns = [
+    /^\s*package\s+[\w.]+\s*;/m,
+    /^\s*import\s+[\w.]+\s*;/m,
+    /\b(public|private|protected)\s+(class|interface|enum)\b/m,
+    /\bpublic\s+static\s+void\s+main\s*\(/m,
+    /\bSystem\.out\.println\s*\(/m,
+  ]
+  const pythonPatterns = [
+    /^\s*def\s+\w+\s*\(/m,
+    /^\s*class\s+\w+\s*:/m,
+    /^\s*from\s+[\w.]+\s+import\s+/m,
+    /^\s*import\s+[\w.]+/m,
+    /^\s*if\s+__name__\s*==\s*['"]__main__['"]\s*:/m,
+  ]
+
+  const javaScore = javaPatterns.reduce((score, pattern) => (
+    score + (pattern.test(content) ? 1 : 0)
+  ), 0)
+  const pythonScore = pythonPatterns.reduce((score, pattern) => (
+    score + (pattern.test(content) ? 1 : 0)
+  ), 0)
+
+  if (content.includes('{') && content.includes('}') && (content.match(/;/g) || []).length >= 2) {
+    return '.java'
+  }
+  if (javaScore > pythonScore) return '.java'
+  return '.py'
+}
+
+function languageToExtension(language = '') {
+  const normalizedLanguage = language?.toLowerCase()
+  if (normalizedLanguage === 'java') return '.java'
+  if (normalizedLanguage === 'python') return '.py'
+  return null
+}
+
 function Dashboard() {
   const [analysisData, setAnalysisData] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -66,19 +103,23 @@ function Dashboard() {
     setLoading(true)
     setError(null)
     setAnalysisData(null)
-    setSelectedFile('pasted_code.py')
+    const initialFileName = `pasted_code${detectPastedCodeExtension(content)}`
+    setSelectedFile(initialFileName)
 
     try {
       const result = await analyzeContent(content)
       const explainResult = await explainAnalysis(result.data)
+      const backendExtension = languageToExtension(result.data?.language)
+      const finalFileName = backendExtension ? `pasted_code${backendExtension}` : initialFileName
       const mergedData = {
         ...result.data,
         nlp_report: explainResult.data?.nlp_report,
       }
       setAnalysisData(mergedData)
+      setSelectedFile(finalFileName)
       // Save to localStorage for export functionality
       localStorage.setItem('lastAnalysis', JSON.stringify({
-        fileName: 'pasted_code.py',
+        fileName: finalFileName,
         timestamp: new Date().toISOString(),
         data: mergedData
       }))
@@ -207,6 +248,7 @@ function Dashboard() {
               <FileUpload
                 onFileUpload={handleFileUpload}
                 onContentAnalysis={handleContentAnalysis}
+                onUploadError={setError}
                 loading={loading}
               />
 

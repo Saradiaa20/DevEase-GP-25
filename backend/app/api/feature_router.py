@@ -5,6 +5,7 @@ Routes extracted features to various analysis modules and coordinates the analys
 
 from typing import Dict, Any, Optional, List
 import unicodedata
+import re
 from app.ml.parsing import ASTParser
 from app.ml.code_smell_detector import CodeSmellDetector
 from app.services.code_quality_metrics import CodeQualityAnalyzer
@@ -38,6 +39,44 @@ def _is_effectively_empty_code(text: Optional[str]) -> bool:
         if cat not in ("Zs", "Zl", "Zp", "Cc", "Cf"):
             return False
     return True
+
+
+def _detect_temp_file_suffix(code_content: str) -> str:
+    """
+    Detect likely language for pasted snippets and return temp file suffix.
+    Defaults to Python for backward compatibility.
+    """
+    java_markers = [
+        r"^\s*package\s+[\w.]+\s*;",
+        r"^\s*import\s+[\w.]+\s*;",
+        r"\b(public|private|protected)\s+(class|interface|enum)\b",
+        r"\b(public|private|protected)\s+static\s+void\s+main\s*\(",
+        r"\bSystem\.out\.println\s*\(",
+        r"\b(new|throws|implements|extends)\b",
+        r"\b(class|interface|enum)\s+\w+\s*\{",
+        r";\s*$",
+    ]
+    python_markers = [
+        r"^\s*def\s+\w+\s*\(",
+        r"^\s*class\s+\w+\s*:",
+        r"^\s*from\s+[\w.]+\s+import\s+",
+        r"^\s*import\s+[\w.]+",
+        r"^\s*if\s+__name__\s*==\s*['\"]__main__['\"]\s*:",
+    ]
+
+    java_score = sum(
+        1 for marker in java_markers if re.search(marker, code_content, flags=re.MULTILINE)
+    )
+    python_score = sum(
+        1 for marker in python_markers if re.search(marker, code_content, flags=re.MULTILINE)
+    )
+
+    if "{" in code_content and "}" in code_content and code_content.count(";") >= 2:
+        java_score += 1
+
+    if java_score > python_score:
+        return ".java"
+    return ".py"
 
 
 class FeatureRouter:
@@ -76,20 +115,30 @@ class FeatureRouter:
         Returns:
             Complete analysis results dictionary
         """
+        temp_file_suffix = ".py"
         # Step 1: Load content, reject empty / whitespace-only (no meaningful code to analyze)
         # FIX: corrected indentation — empty check and ast_result were wrongly nested
         # inside the 'with open' block in the original code.
         if file_path:
-            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                code_content = f.read()
+            with open(file_path, "rb") as f:
+                raw_content = f.read()
+            try:
+                code_content = raw_content.decode("utf-8")
+            except UnicodeDecodeError:
+                try:
+                    code_content = raw_content.decode("utf-16")
+                except UnicodeDecodeError:
+                    code_content = raw_content.decode("latin-1", errors="replace")
+            code_content = code_content.lstrip("\ufeff")
             if _is_effectively_empty_code(code_content):
                 raise EmptyCodeError()
             ast_result = self.ast_parser.parse_file(file_path)
         elif code_content is not None:
             if _is_effectively_empty_code(code_content):
                 raise EmptyCodeError()
+            temp_file_suffix = _detect_temp_file_suffix(code_content)
             import tempfile
-            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py', encoding='utf-8') as tmp:
+            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=temp_file_suffix, encoding='utf-8') as tmp:
                 tmp.write(code_content)
                 tmp_path = tmp.name
 
@@ -98,6 +147,9 @@ class FeatureRouter:
             finally:
                 if os.path.exists(tmp_path):
                     os.unlink(tmp_path)
+
+            if ast_result.get("language") in (None, "Unknown"):
+                ast_result["language"] = "Java" if temp_file_suffix == ".java" else "Python"
         else:
             raise ValueError("Either file_path or code_content must be provided")
 
@@ -147,7 +199,7 @@ class FeatureRouter:
             quality_score = self.quality_analyzer.analyze_file(file_path, smell_summary)
         else:
             import tempfile
-            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py', encoding='utf-8') as tmp:
+            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=temp_file_suffix, encoding='utf-8') as tmp:
                 tmp.write(code_content)
                 tmp_path = tmp.name
 
