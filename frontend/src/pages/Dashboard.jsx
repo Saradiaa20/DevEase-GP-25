@@ -189,8 +189,7 @@ function Dashboard() {
 
   return (
     <Layout>
-      <div className="p-6 space-y-6">
-        {!showResults ? (
+      <div className={`space-y-6 ${showResults ? 'py-6 px-4 sm:px-5 lg:px-6' : 'p-6'}`}>        {!showResults ? (
           <div className="w-full max-w-none mx-auto space-y-6 min-h-[min(72vh,calc(100vh-14rem))]">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
@@ -224,8 +223,7 @@ function Dashboard() {
             </div>
           </div>
         ) : (
-          <div className="max-w-6xl mx-auto w-full space-y-6">
-            <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="w-full max-w-none space-y-6">            <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <h1 className="text-3xl font-bold text-white mb-2">Main Dashboard</h1>
                 <p className="text-gray-400">{dashboardSubtitle}</p>

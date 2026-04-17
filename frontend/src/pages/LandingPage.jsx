@@ -100,16 +100,6 @@ function LandingPage() {
             />
           </div>
         </section>
-
-        {/* Stats Section */}
-        <section className="max-w-7xl mx-auto px-6 py-20">
-          <div className="grid md:grid-cols-4 gap-8">
-            <StatCard number="100+" label="Languages Supported" />
-            <StatCard number="50K+" label="Files Analyzed" />
-            <StatCard number="95%" label="Accuracy Rate" />
-            <StatCard number="24/7" label="Available" />
-          </div>
-        </section>
       </div>
     </div>
   )
@@ -130,15 +120,6 @@ function FeatureCard({ icon: Icon, title, description, color }) {
       </div>
       <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
       <p className="text-gray-400">{description}</p>
-    </div>
-  )
-}
-
-function StatCard({ number, label }) {
-  return (
-    <div className="text-center">
-      <div className="text-4xl font-bold text-cyan-400 mb-2">{number}</div>
-      <div className="text-gray-400">{label}</div>
     </div>
   )
 }
