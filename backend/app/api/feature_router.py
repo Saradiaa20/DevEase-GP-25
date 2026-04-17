@@ -77,8 +77,6 @@ class FeatureRouter:
             Complete analysis results dictionary
         """
         # Step 1: Load content, reject empty / whitespace-only (no meaningful code to analyze)
-        # FIX: corrected indentation — empty check and ast_result were wrongly nested
-        # inside the 'with open' block in the original code.
         if file_path:
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 code_content = f.read()
@@ -114,10 +112,6 @@ class FeatureRouter:
         else:
             smells = []
 
-        # FIX Bug 1 & Bug 2: smell_summary now includes 'total_smells' and 'smells' list.
-        # Without 'total_smells', _calculate_smell_debt() always returned 0.0.
-        # Without 'smells', _estimate_fix_hours() and _get_priority_issues() always
-        # received an empty list, making those calculations completely wrong.
         smell_summary = {
             "by_type": {},
             "by_severity": {},

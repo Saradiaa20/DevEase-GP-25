@@ -95,9 +95,6 @@ class DesignPatternDetector:
 
         if feats["total_methods"] == 0:
             return {**no_pattern_response, "features": feats}
-
-        # if feats["size_score"] <=1:
-        #     return {**no_pattern_response, "features": feats}
     
         X = self._build_dataframe(feats)
 
@@ -118,11 +115,8 @@ class DesignPatternDetector:
         pattern_name = str(self._label_encoder.inverse_transform([pred_idx])[0])
         selected_confidence = 1.0
 
-        #  Prototype fix
         if pattern_name == "Prototype" and "clone(" not in code_content:
             return {**no_pattern_response, "features": feats}
-
-        # =========================
 
         classes = self._label_encoder.classes_
 
@@ -132,21 +126,6 @@ class DesignPatternDetector:
             selected_confidence = float(proba[pred_idx])
         else:
             top = [(pattern_name, 1.0)]
-
-        # # If the model predicts the explicit "none" class, fallback to the strongest
-        # # real pattern class to keep behavior similar to the earlier always-classified UX.
-        # if self._is_none_label(pattern_name):
-        #     if proba is None:
-        #         return {**no_pattern_response, "features": feats}
-
-        #     non_none_idx = [i for i, cls in enumerate(classes) if not self._is_none_label(cls)]
-        #     if not non_none_idx:
-        #         return {**no_pattern_response, "features": feats}
-
-        #     best_idx = max(non_none_idx, key=lambda i: float(proba[i]))
-        #     pattern_name = str(classes[best_idx])
-        #     selected_confidence = float(proba[best_idx])
-
         if self._is_none_label(pattern_name):
             if proba is None or max(proba) < 0.4:
                 return {**no_pattern_response, "features": feats}
