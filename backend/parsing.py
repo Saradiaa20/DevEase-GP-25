@@ -1,16 +1,13 @@
 import ast
 import os
-
 from sklearn import tree
 from code_smell_detector import CodeSmellDetector
 from code_quality_metrics import CodeQualityAnalyzer
 from ml_complexity_predictor import ComplexityPredictor
-
 try:
     import javalang
 except ImportError:
     javalang = None
-
 
 class ASTParser:
     def __init__(self):
@@ -26,27 +23,6 @@ class ASTParser:
 
         with open(file_path, "r", encoding="utf-8") as file:
             code = file.read()
-
-        # # Parse AST structure (if supported)
-        # ast_result = {}
-        # if ext == ".py":
-        #     ast_result = self._parse_python_ast(code)
-        # elif ext == ".java":
-        #     if javalang is None:
-        #         raise ImportError("Install javalang: pip install javalang")
-        #     ast_result = self._parse_java_ast(code)
-        # else:
-        #     # For unsupported AST languages, create basic structure
-        #     ast_result = {
-        #         "language": self._get_language_name(ext),
-        #         "message": f"AST parsing not available for {ext} files, but code smell detection is active"
-        #     }
-        
-        # Detect code smells (works for ALL supported file types)
-        # smells = self.smell_detector.detect_smells(file_path)
-        # smell_summary = self.smell_detector.get_smell_summary()
-        
-        # AST-based analysis ONLY (no fallback)
 
         if ext == ".py":
             ast_result = self._parse_python_ast(code)
@@ -85,12 +61,10 @@ class ASTParser:
             smell_summary["by_severity"][s.severity] = (
                 smell_summary["by_severity"].get(s.severity, 0) + 1
             )
-        # Analyze code quality (works for ALL supported file types)
-        quality_score = self.quality_analyzer.analyze_file(file_path, smell_summary)        # ML Complexity Prediction
+        # Analyze code quality 
+        quality_score = self.quality_analyzer.analyze_file(file_path, smell_summary)       
         ml_prediction = self._predict_complexity(ast_result)
-        
-        # Combine AST results with smell analysis, quality metrics, and ML prediction
-        # ast_result["code_smells"] = smells
+
         ast_result["code_smells"] = [
             {
                 "type": s.smell_type,
@@ -114,7 +88,6 @@ class ASTParser:
                 code_content = file.read()
             
             # Extract features from code
-            #features = self.complexity_predictor.extract_features_from_code(code_content)
             features = {
                 "lines_of_code": ast_result.get("lines_of_code", 0),
                 "cyclomatic_complexity": ast_result.get("cyclomatic_complexity", 0),
@@ -162,7 +135,6 @@ class ASTParser:
 
         classes = [node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
         functions = [node.name for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)]
-        # imports = [node.names[0].name for node in ast.walk(tree) if isinstance(node, ast.Import)]
         imports = []
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
