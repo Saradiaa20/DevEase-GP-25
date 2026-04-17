@@ -43,7 +43,18 @@
     border-color: var(--border-accent);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
-  
+
+  /* Dashboard metric tiles: keep accent colors; scale + shadow only (hover border via Tailwind) */
+  .cyber-card.metric-card {
+    transform-origin: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .cyber-card.metric-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38);
+  }
+
   .cyber-btn {
     @apply px-4 py-2 rounded-lg font-medium;
     background: var(--bg-card);

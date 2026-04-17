@@ -184,14 +184,14 @@ function Dashboard() {
   }
 
   const dashboardSubtitle = showResults
-    ? 'Review metrics, tabs, and detailed analysis below.'
+    ? 'Review analysis details, report and safety wrappers.'
     : 'Analyze your code and track quality metrics'
 
   return (
     <Layout>
       <div className="p-6 space-y-6">
         {!showResults ? (
-          <div className="max-w-6xl mx-auto w-full space-y-6 min-h-[min(72vh,calc(100vh-14rem))]">
+          <div className="w-full max-w-none mx-auto space-y-6 min-h-[min(72vh,calc(100vh-14rem))]">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <h1 className="text-3xl font-bold text-white mb-2">Main Dashboard</h1>
@@ -217,7 +217,7 @@ function Dashboard() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <span className="text-sm font-medium">{selectedFile}</span>
+                    <span className="text-base font-medium">{selectedFile}</span>
                   </div>
                 </div>
               )}
@@ -235,7 +235,7 @@ function Dashboard() {
                 onClick={handleNewAnalysis}
                 className="shrink-0 px-4 py-2 rounded-lg text-sm font-medium border border-[var(--border-primary)] bg-[var(--bg-panel)] text-cyan-400 hover:border-cyan-500/50 hover:bg-[var(--bg-card-hover)] transition-colors"
               >
-                New Analysis
+                New analysis
               </button>
             </div>
             {metrics && (
@@ -256,7 +256,7 @@ function Dashboard() {
                 />
                 <MetricCard
                   icon={ExclamationTriangleIcon}
-                  title="Smells"
+                  title="Code Smells"
                   value={metrics.smells}
                   subtitle="Issues"
                   color={metrics.smells > 5 ? 'red' : 'green'}
@@ -280,21 +280,58 @@ function Dashboard() {
 }
 
 function MetricCard({ icon: Icon, title, value, subtitle, color, score }) {
-  const colorClasses = {
-    green: 'text-green-400 bg-green-400/10 border-green-500/50',
-    blue: 'text-blue-400 bg-blue-400/10 border-blue-500/50',
-    yellow: 'text-yellow-400 bg-yellow-400/10 border-yellow-500/50',
-    orange: 'text-orange-400 bg-orange-400/10 border-orange-500/50',
-    red: 'text-red-400 bg-red-400/10 border-red-500/50',
+  const accents = {
+    green: {
+      text: 'text-green-400',
+      border: 'border-green-500/50',
+      hoverBorder: 'hover:border-green-500/50',
+      bg: 'bg-green-400/10',
+      bar: 'bg-green-400',
+    },
+    blue: {
+      text: 'text-blue-400',
+      border: 'border-blue-500/50',
+      hoverBorder: 'hover:border-blue-500/50',
+      bg: 'bg-blue-400/10',
+      bar: 'bg-blue-400',
+    },
+    yellow: {
+      text: 'text-yellow-400',
+      border: 'border-yellow-500/50',
+      hoverBorder: 'hover:border-yellow-500/50',
+      bg: 'bg-yellow-400/10',
+      bar: 'bg-yellow-400',
+    },
+    orange: {
+      text: 'text-orange-400',
+      border: 'border-orange-500/50',
+      hoverBorder: 'hover:border-orange-500/50',
+      bg: 'bg-orange-400/10',
+      bar: 'bg-orange-400',
+    },
+    red: {
+      text: 'text-red-400',
+      border: 'border-red-500/50',
+      hoverBorder: 'hover:border-red-500/50',
+      bg: 'bg-red-400/10',
+      bar: 'bg-red-400',
+    },
   }
+  const a = accents[color] || accents.blue
 
   return (
-    <div className={`cyber-card border ${colorClasses[color]}`}>
-       <div className="flex justify-between items-start gap-3">
-        <span className="text-lg sm:text-xl font-semibold text-gray-200 shrink-0 leading-snug max-w-[48%]">{title}</span>
-        <div className="flex flex-col items-end text-right min-w-0">
-          <Icon className={`w-6 h-6 shrink-0 ${colorClasses[color].split(' ')[0]}`} />
-          <div className={`text-3xl font-bold mt-1 mb-1 ${colorClasses[color].split(' ')[0]}`}>
+    <div
+      className={`cyber-card metric-card border ${a.border} ${a.hoverBorder} ${a.bg}`}
+    >
+      <div className="grid grid-cols-2 gap-3 items-stretch min-h-[5.5rem]">
+        <div className="min-w-0 flex w-full flex-col justify-center items-start text-left">
+          <span className="text-lg sm:text-xl font-semibold text-gray-200 leading-snug pr-2">
+            {title}
+          </span>
+        </div>
+        <div className="min-w-0 flex flex-col items-end justify-center text-right shrink-0">
+          <Icon className={`w-6 h-6 shrink-0 ${a.text}`} />
+          <div className={`text-3xl font-bold mt-1 mb-1 ${a.text}`}>
             {value}
           </div>
           <div className="text-xs text-gray-400">{subtitle}</div>
@@ -303,7 +340,7 @@ function MetricCard({ icon: Icon, title, value, subtitle, color, score }) {
       {score !== undefined && (
         <div className="mt-2 h-1 bg-[#2d3748] rounded-full overflow-hidden">
           <div
-            className={`h-full ${colorClasses[color].split(' ')[1]}`}
+            className={`h-full ${a.bar}`}
             style={{ width: `${Math.min(100, score)}%` }}
           />
         </div>

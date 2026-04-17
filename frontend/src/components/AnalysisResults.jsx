@@ -7,7 +7,6 @@ import AnnotatedCode from './AnnotatedCode'
 import DesignPatternCard from './DesignPatternCard'
 import NLPReport from './NLPReport'
 import {
-  SparklesIcon,
   CheckCircleIcon,
   XMarkIcon,
   ExclamationTriangleIcon,
@@ -137,21 +136,12 @@ function WrapperResults({ wrapperData }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h2 className="text-base font-bold text-white">Safety Wrappers</h2>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Unsafe patterns and suggested safer replacements
-          </p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <SparklesIcon className="w-5 h-5 text-cyan-400" />
-          <span className="text-xs px-3 py-1 rounded-full border border-cyan-800/50 bg-cyan-900/20 text-cyan-300">
-            {patternsFound} pattern{patternsFound === 1 ? '' : 's'} detected
-          </span>
-        </div>
+ <div>
+        <h2 className="text-base font-bold text-white">Safety Wrappers</h2>
+        <p className="text-xs text-gray-500 mt-0.5">
+          Unsafe patterns and suggested safer replacements
+        </p>
       </div>
-
       {wrapperData?.message && (
         <div className="rounded-lg border border-cyan-800/50 bg-cyan-900/10 px-4 py-3">
           <p className="text-xs font-semibold text-cyan-400 mb-1 uppercase tracking-wide">Overview</p>
