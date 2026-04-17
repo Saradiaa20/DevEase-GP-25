@@ -290,8 +290,8 @@ function MetricCard({ icon: Icon, title, value, subtitle, color, score }) {
 
   return (
     <div className={`cyber-card border ${colorClasses[color]}`}>
-      <div className="flex justify-between items-start gap-3">
-        <span className="text-xs text-gray-400 shrink-0">{title}</span>
+       <div className="flex justify-between items-start gap-3">
+        <span className="text-lg sm:text-xl font-semibold text-gray-200 shrink-0 leading-snug max-w-[48%]">{title}</span>
         <div className="flex flex-col items-end text-right min-w-0">
           <Icon className={`w-6 h-6 shrink-0 ${colorClasses[color].split(' ')[0]}`} />
           <div className={`text-3xl font-bold mt-1 mb-1 ${colorClasses[color].split(' ')[0]}`}>
