@@ -3,7 +3,7 @@ AI-powered NLP Explainer for DevEase.
 Primary mode uses GroqCloud LLM API; fallback uses local rule-based generation.
 """
 
-from datetime import datetime
+from datetime import datetime, UTC
 import json
 import os
 import re
@@ -243,7 +243,7 @@ def _fallback_report(analysis_data: Dict[str, Any], reason: str = "") -> Dict[st
     return {
         **sections,
         "full_report": full_report,
-        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "generated_at": datetime.now(UTC).isoformat(),
         "generation_source": "fallback",
         "fallback_reason": reason or "Groq API key not configured",
     }
@@ -392,7 +392,7 @@ def generate_nlp_report(analysis_data: Dict[str, Any]) -> Dict[str, Any]:
             return {
                 **sections,
                 "full_report": full_report,
-                "generated_at": datetime.utcnow().isoformat() + "Z",
+                "generated_at": datetime.now(UTC).isoformat(),
                 "generation_source": "groq",
                 "model": model,
             }
