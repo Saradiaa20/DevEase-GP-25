@@ -5,6 +5,12 @@ Configuration settings for the backend API
 import os
 from pathlib import Path
 
+# Database Configuration
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql://postgres:1234@localhost:5432/devease_db"
+)
+
 # Base directory
 BASE_DIR = Path(__file__).parent.parent.parent
 
