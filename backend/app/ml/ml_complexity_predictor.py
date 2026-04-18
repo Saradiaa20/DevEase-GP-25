@@ -441,7 +441,7 @@ class ComplexityPredictor:
         
         # Use compiled regex patterns for better performance
         if_pattern = re.compile(r'\bif\s*[\(]')
-        loop_pattern = re.compile(r'\b(for|while|do)\s+')
+        loop_pattern = re.compile(r'\b(for|while|do)\b')
         break_pattern = re.compile(r'\bbreak\b')
         
         # Count basic features (single pass)

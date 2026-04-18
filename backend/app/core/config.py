@@ -5,6 +5,12 @@ Configuration settings for the backend API
 import os
 from pathlib import Path
 
+# Database Configuration
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql://postgres:1234@localhost:5432/devease_db"
+)
+
 # Base directory
 BASE_DIR = Path(__file__).parent.parent.parent
 
@@ -19,7 +25,7 @@ CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
 # File Upload Configuration
 MAX_UPLOAD_SIZE = int(os.getenv("MAX_UPLOAD_SIZE", 10 * 1024 * 1024))  # 10MB
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", str(BASE_DIR / "uploads"))
-ALLOWED_EXTENSIONS = ['.py', '.java', '.js', '.cpp', '.cs', '.php']
+ALLOWED_EXTENSIONS = ['.py', '.java']
 
 # Model Configuration
 MODEL_PATH = os.getenv("MODEL_PATH", str(BASE_DIR / "complexity_model.pkl"))
