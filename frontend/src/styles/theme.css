@@ -216,13 +216,69 @@ html.high-contrast[data-theme="light"] {
 }
 
 /* ---------------------------------------------------------------------------
-   Focus mode – reduce distraction (dim non-essential UI, stronger focus ring)
+   Focus mode – ADHD-friendly: reduce distractions, calm UI, strong focus cues
    --------------------------------------------------------------------------- */
+
+/* Dim decorative / non-essential sidebar elements */
 html.focus-mode .focus-mode-hide {
-  opacity: 0.4;
+  opacity: 0.25;
   pointer-events: none;
+  transition: opacity 0.3s ease;
 }
+
+/* Strong, warm focus ring on all interactive elements */
 html.focus-mode *:focus-visible {
-  outline: 3px solid var(--accent-cyan);
-  outline-offset: 2px;
+  outline: 3px solid #fbbf24;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.2);
 }
+
+/* Calm the background — reduce intense neon glow effects */
+html.focus-mode {
+  --accent-cyan: #22b8cc;
+  --border-accent: #22b8cc;
+}
+
+/* Increase line-height and letter-spacing for easier reading */
+html.focus-mode body,
+html.focus-mode p,
+html.focus-mode span,
+html.focus-mode div,
+html.focus-mode li,
+html.focus-mode h1,
+html.focus-mode h2,
+html.focus-mode h3,
+html.focus-mode h4 {
+  line-height: 1.8 !important;
+  letter-spacing: 0.02em;
+}
+
+/* Highlight the hovered / active card so focus is clear */
+html.focus-mode .cyber-card-panel:hover,
+html.focus-mode .card-cyber:hover {
+  border-color: #fbbf24 !important;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.35), 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Suppress all CSS animations / transitions that can be distracting */
+html.focus-mode *,
+html.focus-mode *::before,
+html.focus-mode *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.15s !important;
+}
+
+/* Subtle amber left-border indicator on active nav link */
+html.focus-mode nav a:hover,
+html.focus-mode nav button:hover {
+  border-left: 3px solid #fbbf24;
+  padding-left: calc(1rem - 3px);
+  color: #fbbf24 !important;
+}
+
+/* Slightly increase font size for legibility */
+html.focus-mode body {
+  font-size: 1.05rem;
+}
+

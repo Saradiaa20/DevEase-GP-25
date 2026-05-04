@@ -5,7 +5,8 @@ const STORAGE_KEY = 'devease-settings'
 const defaults = {
   theme: 'dark',
   disabilityPreset: 'default',
-  dyslexicFont: false,
+  dyslexicFont: false,   // controls Lexend font via CSS class
+  dyslexia: false,       // controls DyslexiaEngine text-shuffle
   highContrast: false,
   focusMode: false,
 }
@@ -45,12 +46,14 @@ export function SettingsProvider({ children }) {
     setSettings((prev) => ({
       ...prev,
       disabilityPreset: preset,
-      dyslexicFont: preset === 'dyslexia' || preset === 'adhdFocus',
+      dyslexia:     preset === 'dyslexia',
+      dyslexicFont: preset === 'dyslexia',
       highContrast: preset === 'lowVision',
-      focusMode: preset === 'adhdFocus',
+      focusMode:    preset === 'adhdFocus',
     }))
   }, [setSettings])
   const setDyslexicFont = useCallback((v) => setSettings({ dyslexicFont: v }), [setSettings])
+  const setDyslexia = useCallback((v) => setSettings({ dyslexia: v }), [setSettings])
   const setHighContrast = useCallback((v) => setSettings({ highContrast: v }), [setSettings])
   const setFocusMode = useCallback((v) => setSettings({ focusMode: v }), [setSettings])
   const setToggle = useCallback((key, value) => setSettings({ [key]: value }), [setSettings])
@@ -71,6 +74,7 @@ export function SettingsProvider({ children }) {
     setTheme,
     setDisabilityPreset,
     setDyslexicFont,
+    setDyslexia,
     setHighContrast,
     setFocusMode,
     setToggle,
