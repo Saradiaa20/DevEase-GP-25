@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { SettingsProvider } from './contexts/SettingsContext'
+import DyslexiaEngine from './components/DyslexiaEngine'
 import LandingPage from './pages/LandingPage'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -72,6 +73,7 @@ function App() {
     return (
       <ErrorBoundary>
         <SettingsProvider>
+          <DyslexiaEngine />
           <Router>
           <Routes>
             <Route path="/" element={<LandingPage />} />

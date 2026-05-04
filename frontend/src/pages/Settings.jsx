@@ -6,10 +6,10 @@ function Settings() {
   const { settings, setDisabilityPreset, setTheme, setToggle } = useSettings()
 
   const presets = [
-    { id: 'default', name: 'Default' },
-    // { id: 'dyslexia', name: 'Dyslexia' },
-    { id: 'lowVision', name: 'Low Vision' },
-    { id: 'adhdFocus', name: 'ADHD Focus' },
+    { id: 'default',    name: 'Default',    description: 'Reset all accessibility settings' },
+    { id: 'dyslexia',   name: 'Dyslexia',   description: 'Dyslexia-friendly font + text simulation' },
+    { id: 'lowVision',  name: 'Low Vision', description: 'High contrast mode for better visibility' },
+    { id: 'adhdFocus',  name: 'ADHD Focus', description: 'Focus mode to reduce distractions' },
   ]
 
   const handlePresetChange = (preset) => setDisabilityPreset(preset)
@@ -43,10 +43,12 @@ function Settings() {
                     : 'theme-bg-card theme-border theme-text-muted hover:border-cyan-500/50'
                 }`}
               >
-                {preset.name}
-                {settings.disabilityPreset === preset.id && (
-                  <span className="ml-2 text-xs">✓ Selected</span>
-                )}
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{preset.name}</span>
+                  {settings.disabilityPreset === preset.id && (
+                    <span className="text-xs">✓ Selected</span>
+                  )}
+                </div>
               </button>
             ))}
           </div>
@@ -56,12 +58,18 @@ function Settings() {
         <div className="cyber-card-panel">
           <h2 className="text-xl font-semibold theme-text-primary mb-4">Accessibility Options</h2>
           <div className="space-y-4">
-            {/* <ToggleOption
+            <ToggleOption
+              label="Dyslexia Mode"
+              description="Simulate dyslexic text perception — shuffles middle letters of words"
+              checked={settings.dyslexia}
+              onChange={() => handleToggle('dyslexia')}
+            />
+            <ToggleOption
               label="Dyslexic-Friendly Font"
-              description="Use fonts optimized for dyslexia"
+              description="Switch to Lexend, a font optimized for readers with dyslexia"
               checked={settings.dyslexicFont}
               onChange={() => handleToggle('dyslexicFont')}
-            /> */}
+            />
             <ToggleOption
               label="High Contrast Mode"
               description="Increase contrast for better visibility"
@@ -70,7 +78,7 @@ function Settings() {
             />
             <ToggleOption
               label="Focus Mode"
-              description="Reduce distractions for better focus"
+              description="Reduce distractions for better focus (ADHD)"
               checked={settings.focusMode}
               onChange={() => handleToggle('focusMode')}
             />
@@ -117,7 +125,6 @@ function ToggleOption({ label, description, checked, onChange }) {
     <div className="flex items-center justify-between p-4 theme-bg-card rounded-lg theme-border border">
       <div>
         <div className="theme-text-primary font-medium">{label}</div>
-        <div className="theme-text-muted text-sm">{description}</div>
       </div>
       <button
         onClick={onChange}
@@ -136,3 +143,4 @@ function ToggleOption({ label, description, checked, onChange }) {
 }
 
 export default Settings
+
