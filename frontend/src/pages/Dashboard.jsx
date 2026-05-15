@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Layout from '../components/Layout'
 import FileUpload from '../components/FileUpload'
 import AnalysisResults from '../components/AnalysisResults'
@@ -8,7 +8,6 @@ import {
   CpuChipIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
-
 
 function formatApiError(err) {
   const d = err.response?.data?.detail
@@ -61,6 +60,20 @@ function Dashboard() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [selectedFile, setSelectedFile] = useState(null)
+
+      useEffect(() => {
+        fetch("http://127.0.0.1:8000/latest-analysis")
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                setAnalysisData(data);
+            })
+            .catch((err)=>
+            {
+              console.error(err);
+            });
+    }, []);
+
 
   const handleFileUpload = async (file) => {
     setLoading(true)
