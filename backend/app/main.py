@@ -1,4 +1,6 @@
 
+from unittest import result
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -71,7 +73,7 @@ security = HTTPBearer()
 user_counter = 1
 project_counter = 1
 analysis_counter = 1
-
+LATEST_ANALYSIS = {}
 # Request/Response models
 class AnalysisResponse(BaseModel):
     success: bool
@@ -198,6 +200,10 @@ async def health_check():
         "service": "DevEase API",
         "version": "1.0.0"
     }
+
+@app.get("/latest-analysis")
+async def latest_analysis():
+    return LATEST_ANALYSIS
 
 @app.get("/api/design-pattern-pipeline")
 async def design_pattern_pipeline_info():
@@ -406,6 +412,9 @@ async def analyze_file_endpoint(
             except UnicodeDecodeError:
                 code_content = raw_code.decode('latin-1', errors='replace')
             result["wrapper_generator"] = _build_wrapper_payload(code_content, file.filename)
+
+
+
             
             # Store analysis result if project_id provided
             if project_id and authorization:
@@ -464,11 +473,13 @@ async def analyze_content_endpoint(
             except UnicodeDecodeError:
                 code_content = raw_code.decode("latin-1", errors="replace")
             result["wrapper_generator"] = _build_wrapper_payload(code_content, request.file_path)
+
             
         elif request.content:
             # Analyze from content string
             result = feature_router.analyze_code(code_content=request.content)
             result["wrapper_generator"] = _build_wrapper_payload(request.content)
+
         else:
             raise HTTPException(status_code=400, detail="Either file_path or content must be provided")
         
@@ -505,7 +516,8 @@ async def analyze_file_by_path(
         except UnicodeDecodeError:
             code_content = raw_code.decode("latin-1", errors="replace")
         result["wrapper_generator"] = _build_wrapper_payload(code_content, file_path)
-        
+
+
         return AnalysisResponse(
             success=True,
             data=result,
@@ -589,6 +601,7 @@ async def analyze_file_with_explanation(
             except UnicodeDecodeError:
                 code_content = raw_code.decode("latin-1", errors="replace")
             result["wrapper_generator"] = _build_wrapper_payload(code_content, file.filename)
+
             return AnalysisResponse(
                 success=True,
                 data=result,
@@ -603,6 +616,66 @@ async def analyze_file_with_explanation(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+
+class VSCodeAnalysisRequest(BaseModel):
+    files: List[str]
+
+
+@app.post("/analyze")
+async def analyze_workspace(request: VSCodeAnalysisRequest):
+
+    global LATEST_ANALYSIS
+
+    analyzed_files = []
+
+    for file_path in request.files:
+
+        try:
+            if not os.path.exists(file_path):
+                continue
+
+            # Main analysis
+            result = feature_router.analyze_code(file_path=file_path)
+
+            # Read code
+            with open(file_path, "rb") as source_file:
+                raw_code = source_file.read()
+
+            try:
+                code_content = raw_code.decode("utf-8")
+            except UnicodeDecodeError:
+                code_content = raw_code.decode("latin-1", errors="replace")
+
+            # Wrapper generator
+            result["wrapper_generator"] = _build_wrapper_payload(
+                code_content,
+                file_path
+            )
+
+            analyzed_files.append({
+                "file": file_path,
+                "analysis": {
+                    "success": True,
+                    "data": result,
+                    "message": "Analysis completed successfully"
+                }
+            })
+
+        except Exception as e:
+            analyzed_files.append({
+                "file": file_path,
+                "analysis": {
+                    "success": False,
+                    "error": str(e)
+                }
+            })
+
+    LATEST_ANALYSIS = {
+        "success": True,
+        "results": analyzed_files
+    }
+
+    return LATEST_ANALYSIS
 
 if __name__ == "__main__":
     import uvicorn

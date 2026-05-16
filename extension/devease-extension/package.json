@@ -1,0 +1,38 @@
+{
+  "name": "devease-extension",
+  "displayName": "DevEase-Extension",
+  "description": "DevEase is a smart code analysis extension that helps developers write cleaner, more maintainable code directly within their development environment. It performs real-time analysis to detect code smells, evaluate code quality, estimate technical debt, and predict complexity using machine learning. The extension also identifies design patterns and provides intelligent fix suggestions and refactoring recommendations to improve code structure and adherence to best practices. Designed with accessibility and usability in mind, DevEase integrates seamlessly into the developer workflow, supporting both individual developers and team-based projects.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": ["onCommand:devease-extension.DevEaseAnalyzer", "onCommand:devease-extension.openPanel"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+      "command": "devease-extension.DevEaseAnalyzer",
+      "title": "DevEase Analyzer"
+      },
+      { "command": "devease-extension.openPanel",
+        "title": "Open DevEase Panel"
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.116.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "eslint": "^9.39.3",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}
