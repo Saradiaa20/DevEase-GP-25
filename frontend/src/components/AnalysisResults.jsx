@@ -6,13 +6,14 @@ import AnnotatedCode from './AnnotatedCode'
 // import FunctionComplexity from './FunctionComplexity'  // Hidden - Complexity tab disabled
 import DesignPatternCard from './DesignPatternCard'
 import NLPReport from './NLPReport'
+import FixedCode from './FixedCode'
 import {
   CheckCircleIcon,
   XMarkIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
 
-function AnalysisResults({ data }) {
+function AnalysisResults({ data, fileName }) {
   const hasNlpReport = !!data?.nlp_report
   const wrapperData = data?.wrapper_generator
   const hasWrapperTab =
@@ -25,6 +26,7 @@ function AnalysisResults({ data }) {
     report: 'Explanation Report',
     overview: 'Analysis Details',
     code: 'Source Code',
+    fixed: 'Fixed Code',
     wrappers: 'Safety Wrappers',
   }
 
@@ -32,6 +34,7 @@ function AnalysisResults({ data }) {
   if (hasNlpReport) tabs.push('report')
   if (hasWrapperTab) tabs.push('wrappers')
   tabs.push('code')
+  tabs.push('fixed')
 
   // Backend returns code_smells as an array; some paths use { total_smells, smells }.
   const rawSmells = data?.code_smells
@@ -94,6 +97,11 @@ function AnalysisResults({ data }) {
       {/* Code Tab */}
       {activeTab === 'code' && (
         <AnnotatedCode data={data} />
+      )}
+
+      {/* Fixed Code Tab */}
+      {activeTab === 'fixed' && (
+        <FixedCode data={data} fileName={fileName} />
       )}
 
       {/* Wrapper Generator Tab */}

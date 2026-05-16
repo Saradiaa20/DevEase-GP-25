@@ -58,6 +58,10 @@ app.add_middleware(
 from app.api.wrapper_router import router as wrapper_router
 app.include_router(wrapper_router)
 
+# Fixed Code feature
+from app.api.fixed_code_router import router as fixed_code_router
+app.include_router(fixed_code_router)
+
 # Initialize components
 parser = ASTParser()
 file_handler = FileHandler()

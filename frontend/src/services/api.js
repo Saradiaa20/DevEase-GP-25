@@ -123,4 +123,14 @@ export const explainAnalysis = async (analysisData) => {
   return response.data
 }
 
+export const generateFixedCode = async ({ analysisData, codeContent, language, fileName }) => {
+  const response = await api.post('/api/fixed-code/generate', {
+    analysis_data: analysisData,
+    code_content: codeContent,
+    language,
+    file_name: fileName,
+  })
+  return response.data
+}
+
 export default api

@@ -157,7 +157,7 @@ function Dashboard() {
     return {
       technicalDebt: debtScore,
       technicalDebtHours: estimatedHours,
-      debtRating: getDebtRating(debtScore, estimatedHours, totalSmells, overallQuality),
+      debtRating: getDebtRating(debtScore, estimatedHours, totalSmells),
       complexity: mlComplexity?.prediction?.complexity_description || 'N/A',
       complexityScore: qualityScore?.complexity || 0,
       cyclomaticValue,
@@ -179,7 +179,7 @@ function Dashboard() {
 
   // Technical Debt rating based primarily on estimated hours to fix
   // Lower hours = better grade (less debt = better)
-  const getDebtRating = (debtScore, estimatedHours, smellCount, qualityScore) => {
+  const getDebtRating = (debtScore, estimatedHours, smellCount) => {
     const safeHours = estimatedHours || 0
     const safeSmells = smellCount || 0
     
@@ -311,7 +311,7 @@ function Dashboard() {
               </div>
             )}
 
-            <AnalysisResults data={analysisData} />
+            <AnalysisResults data={analysisData} fileName={selectedFile} />
           </div>
         )}
       </div>
@@ -319,7 +319,7 @@ function Dashboard() {
   )
 }
 
-function MetricCard({ icon: Icon, title, value, subtitle, color, score }) {
+function MetricCard({ icon, title, value, subtitle, color, score }) {
   const accents = {
     green: {
       text: 'text-green-400',
@@ -370,7 +370,7 @@ function MetricCard({ icon: Icon, title, value, subtitle, color, score }) {
           </span>
         </div>
         <div className="min-w-0 flex flex-col items-end justify-center text-right shrink-0">
-          <Icon className={`w-6 h-6 shrink-0 ${a.text}`} />
+          {React.createElement(icon, { className: `w-6 h-6 shrink-0 ${a.text}` })}
           <div className={`text-3xl font-bold mt-1 mb-1 ${a.text}`}>
             {value}
           </div>
