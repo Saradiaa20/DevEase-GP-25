@@ -131,13 +131,17 @@ AI-improved code generated from the current analysis    </p>
           {result?.fixed_code && (
             <DownloadButton code={result.fixed_code} fileName={outputFileName} />
           )}
-          <button
-            type="button"
-            onClick={handleGenerate}
-            disabled={loading || !sourceCode}
-           className="text-sm px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-all duration-300 hover:scale-[1.02] inline-flex items-center gap-2 font-semibold"        >
-            <SparklesIcon className="w-4 h-4" />
-{loading ? 'Improving...' : result ? 'Generate New Fix' : 'Improve Code'}          </button>
+        {!result && (
+  <button
+    type="button"
+    onClick={handleGenerate}
+    disabled={loading || !sourceCode}
+    className="text-sm px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-all duration-300 hover:scale-[1.02] inline-flex items-center gap-2 font-semibold"
+  >
+    <SparklesIcon className="w-4 h-4" />
+    {loading ? 'Improving...' : 'Improve Code'}
+  </button>
+)}
         </div>
       </div>
 
