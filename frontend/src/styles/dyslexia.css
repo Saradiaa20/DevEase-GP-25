@@ -1,0 +1,69 @@
+/* Google Fonts — loaded only when needed by the browser's font-display */
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+/* OpenDyslexic is self-hosted — fallback to system sans if unavailable */
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: local('OpenDyslexic');
+  font-display: swap;
+}
+
+/* ── Baseline dyslexia-friendly rules — always active ───────────────── */
+body, p, li, td, th, label, input, textarea, select, button,
+h1, h2, h3, h4, h5, h6, span, a {
+  text-align: left;
+  text-transform: none;
+  font-style: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+  -webkit-hyphens: none;
+  hyphens: none;
+}
+
+/* Prevent any animation or transition on text content */
+* {
+  animation-name: none !important;
+}
+
+/* ── Active state ────────────────────────────────────────────────────── */
+html.dx-active body,
+html.dx-active p,
+html.dx-active li,
+html.dx-active td,
+html.dx-active th,
+html.dx-active label,
+html.dx-active input,
+html.dx-active textarea,
+html.dx-active select,
+html.dx-active button,
+html.dx-active h1,
+html.dx-active h2,
+html.dx-active h3,
+html.dx-active h4,
+html.dx-active h5,
+html.dx-active h6 {
+  font-family: var(--dx-font-family) !important;
+  letter-spacing: var(--dx-letter-spacing) !important;
+  word-spacing: var(--dx-word-spacing) !important;
+  line-height: var(--dx-line-height) !important;
+}
+
+/* Never touch code blocks */
+html.dx-active pre,
+html.dx-active code,
+html.dx-active kbd,
+html.dx-active samp,
+html.dx-active .shiki,
+html.dx-active [class*="language-"],
+html.dx-active [class*="hljs"] {
+  font-family: inherit !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+}
+
+/* ── Sentence highlight ───────────────────────────────────────────────── */
+.dx-sentence-active {
+  background-color: rgba(253, 224, 71, 0.35) !important;
+  border-radius: 3px;
+  transition: background-color 0.1s;
+}
