@@ -1,18 +1,11 @@
 import React from 'react'
 import Layout from '../components/Layout'
 import { useSettings } from '../contexts/SettingsContext'
+import DyslexiaPanel from '../components/dyslexia/DyslexiaPanel'
 
 function Settings() {
-  const { settings, setDisabilityPreset, setTheme, setToggle } = useSettings()
+  const { settings, setTheme, setToggle } = useSettings()
 
-  const presets = [
-    { id: 'default',    name: 'Default',    description: 'Reset all accessibility settings' },
-    { id: 'dyslexia',   name: 'Dyslexia',   description: 'Dyslexia-friendly font + text simulation' },
-    { id: 'lowVision',  name: 'Low Vision', description: 'High contrast mode for better visibility' },
-    { id: 'adhdFocus',  name: 'ADHD Focus', description: 'Focus mode to reduce distractions' },
-  ]
-
-  const handlePresetChange = (preset) => setDisabilityPreset(preset)
   const handleToggle = (key) => setToggle(key, !settings[key])
   const handleThemeChange = (theme) => setTheme(theme)
 
@@ -24,61 +17,22 @@ function Settings() {
           <p className="theme-text-muted">Customize your accessibility preferences</p>
         </div>
 
-        {/* Disability Presets */}
-        <div className="cyber-card-panel">
-          <h2 className="text-xl font-semibold theme-text-primary mb-4 flex items-center">
-            <svg className="w-5 h-5 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-            </svg>
-            Disability Presets
-          </h2>
-          <div className="space-y-2">
-            {presets.map((preset) => (
-              <button
-                key={preset.id}
-                onClick={() => handlePresetChange(preset.id)}
-                className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                  settings.disabilityPreset === preset.id
-                    ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400'
-                    : 'theme-bg-card theme-border theme-text-muted hover:border-cyan-500/50'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">{preset.name}</span>
-                  {settings.disabilityPreset === preset.id && (
-                    <span className="text-xs">✓ Selected</span>
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Dyslexia Friendly Mode */}
+        <DyslexiaPanel />
 
-        {/* Granular Controls */}
+        {/* Accessibility Options */}
         <div className="cyber-card-panel">
           <h2 className="text-xl font-semibold theme-text-primary mb-4">Accessibility Options</h2>
           <div className="space-y-4">
             <ToggleOption
-              label="Dyslexia Mode"
-              description="Simulate dyslexic text perception — shuffles middle letters of words"
-              checked={settings.dyslexia}
-              onChange={() => handleToggle('dyslexia')}
-            />
-            <ToggleOption
-              label="Dyslexic-Friendly Font"
-              description="Switch to Lexend, a font optimized for readers with dyslexia"
-              checked={settings.dyslexicFont}
-              onChange={() => handleToggle('dyslexicFont')}
-            />
-            <ToggleOption
-              label="High Contrast Mode"
+              label="Low Vision"
               description="Increase contrast for better visibility"
               checked={settings.highContrast}
               onChange={() => handleToggle('highContrast')}
             />
             <ToggleOption
-              label="Focus Mode"
-              description="Reduce distractions for better focus (ADHD)"
+              label="ADHD Focus"
+              description="Reduce distractions for better focus"
               checked={settings.focusMode}
               onChange={() => handleToggle('focusMode')}
             />

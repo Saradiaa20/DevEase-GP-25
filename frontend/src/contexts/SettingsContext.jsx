@@ -46,7 +46,7 @@ export function SettingsProvider({ children }) {
     setSettings((prev) => ({
       ...prev,
       disabilityPreset: preset,
-      dyslexia:     preset === 'dyslexia',
+      dyslexia:     false,
       dyslexicFont: preset === 'dyslexia',
       highContrast: preset === 'lowVision',
       focusMode:    preset === 'adhdFocus',
