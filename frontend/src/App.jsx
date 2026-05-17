@@ -1,7 +1,11 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { SettingsProvider } from './contexts/SettingsContext'
-import DyslexiaEngine from './components/DyslexiaEngine'
+import { DyslexiaProvider } from './components/dyslexia/DyslexiaContext'
+import DyslexiaOverlay from './components/dyslexia/DyslexiaOverlay'
+import TTSToolbar from './components/dyslexia/TTSToolbar'
+import ReadingRuler from './components/dyslexia/ReadingRuler'
+import SentenceHighlighter from './components/dyslexia/SentenceHighlighter'
 import LandingPage from './pages/LandingPage'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -73,7 +77,11 @@ function App() {
     return (
       <ErrorBoundary>
         <SettingsProvider>
-          <DyslexiaEngine />
+          <DyslexiaProvider>
+          <DyslexiaOverlay />
+          <TTSToolbar />
+          <ReadingRuler />
+          <SentenceHighlighter />
           <Router>
           <Routes>
             <Route path="/" element={<LandingPage />} />
@@ -87,6 +95,7 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
+          </DyslexiaProvider>
         </SettingsProvider>
       </ErrorBoundary>
     )
