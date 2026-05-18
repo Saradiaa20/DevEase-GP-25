@@ -201,7 +201,7 @@ async def health_check():
         "version": "1.0.0"
     }
 
-@app.get("/latest-analysis")
+@app.get("/api/latest-analysis")
 async def latest_analysis():
     return LATEST_ANALYSIS
 
